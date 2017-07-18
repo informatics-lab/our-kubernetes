@@ -9,3 +9,7 @@ output "k8s-secret-access-key" {
 output "k8s-state-bucket" {
   value = "${aws_s3_bucket.k8s-config.bucket}"
 }
+
+output "k8s-dns-zone" {
+  value = "${aws_route53_zone.k8s.name}"
+}
