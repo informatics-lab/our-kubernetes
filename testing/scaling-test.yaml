@@ -1,0 +1,18 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: cattle
+spec:
+  replicas: 10
+  template:
+    metadata:
+      labels:
+        app: cattle
+    spec:
+      containers:
+      - image: gcr.io/google_containers/echoserver:1.0
+        imagePullPolicy: Always
+        name: cattle
+        resources:
+          requests:
+            cpu: 100m
