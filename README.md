@@ -68,7 +68,9 @@ View the dashboard by running `kubectl proxy` and then visiting http://localhost
 We also probably want to be able to route traffic into the cluster. This ingress controller will create an ELB which will route traffic to an nginx reverse proxy running on the cluster. You can add new services to the reverse proxy using kubernetes ingress.
 
 ```shell
-kubectl create -f ./cluster-services/nginx-ingress-controller.yaml
+kubectl create -f ./cluster-services/nginx-ingress/config.yaml
+kubectl create -f ./cluster-services/nginx-ingress/ingress.yaml
+kubectl create -f ./cluster-services/nginx-ingress/services.yaml
 ```
 
 #### Create ingress DNS entry
@@ -89,6 +91,18 @@ By default this cluster will not scale automatically despite kops creating the n
 
 ```shell
 kubectl apply -f ./cluster-services/cluster-autoscaler.yml
+```
+
+### Configure telemetry and monitoring
+
+We also want to have a telegraf agent running on each node sending telemetry to our central monitoring service. 
+
+```shell
+cp ./cluster-services/monitoring/secret.example.yaml ./cluster-services/monitoring/secret.yaml
+# Replace username and password in secret.yaml with base64 encoded values
+kubectl create -f ./cluster-services/monitoring/secret.yaml
+kubectl create configmap telegraf-config --from-file=./cluster-services/monitoring/telegraf.conf  --namespace=kube-system
+kubectl create -f ./cluster-services/monitoring/monitoring.yaml
 ```
 
 ## Connect to an existing cluster
