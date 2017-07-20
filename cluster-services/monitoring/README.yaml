@@ -1,0 +1,4 @@
+```shell
+kubectl create configmap telegraf-config --from-file=telegraf.conf  --namespace=kube-system
+kubectl create -f monitoring.yaml
+```
