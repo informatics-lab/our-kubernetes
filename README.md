@@ -110,6 +110,8 @@ kubectl create -f ./cluster-services/monitoring/monitoring.yaml
 If a cluster already exists you can retrieve the `kubectl` config by setting the `KOPS_CLUSTER_NAME` and `KOPS_STATE_STORE` vars and then running the following command.
 
 ```shell
+export KOPS_CLUSTER_NAME="cluster.k8s.informaticslab.co.uk"
+export KOPS_STATE_STORE="s3://informticslab-k8s-config"
 kops export kubecfg --name ${KOPS_CLUSTER_NAME}
 ```
 
