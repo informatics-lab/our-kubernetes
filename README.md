@@ -61,7 +61,7 @@ The basic kubernetes cluster doesn't come with the dashboard already installed s
 kubectl create -f https://git.io/kube-dashboard
 ```
 
-View the dashboard by running `kubectl proxy` and then visiting http://localhost:8001/ui.
+View the dashboard by running `kubectl proxy` and then visiting http://localhost:8001/api/v1/namespaces/kube-system/services/https:kubernetes-dashboard:/proxy/.
 
 ### Configure ingress
 
@@ -95,7 +95,7 @@ kubectl apply -f ./cluster-services/cluster-autoscaler.yml
 
 ### Configure telemetry and monitoring
 
-We also want to have a telegraf agent running on each node sending telemetry to our central monitoring service. 
+We also want to have a telegraf agent running on each node sending telemetry to our central monitoring service.
 
 ```shell
 cp ./cluster-services/monitoring/secret.example.yaml ./cluster-services/monitoring/secret.yaml

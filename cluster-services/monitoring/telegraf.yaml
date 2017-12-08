@@ -18,7 +18,7 @@ spec:
               cpu: 0.15
           securityContext:
             privileged: true
-          image: telegraf
+          image: telegraf:1.2.1-alpine
           name: telegraf
           env:
             - name: INFLUX_DB_INGEST_USER

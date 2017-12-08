@@ -2,6 +2,6 @@
 cp secret.example.yaml secret.yaml
 # Replace username and password in secret.yaml with base64 encoded values
 kubectl create -f secret.yaml
-kubectl create configmap telegraf-config --from-file=telegraf.conf  --namespace=kube-system
+kubectl create -f config.yaml
 kubectl create -f monitoring.yaml
 ```

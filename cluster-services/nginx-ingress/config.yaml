@@ -7,3 +7,4 @@ metadata:
   namespace: kube-system
 data:
   use-proxy-protocol: "true"
+  proxy-body-size: "8m"
