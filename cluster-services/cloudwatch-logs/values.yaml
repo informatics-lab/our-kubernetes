@@ -1,0 +1,11 @@
+rbac:
+  create: true
+
+image: 'informaticslab/fluentd-kubernetes-daemonset'
+imageTag: 'v0.12-alpine-cloudwatch'
+imagePullPolicy: Always
+
+awsRegion: 'eu-west-2'
+awsRole: OVERRIDEME
+
+logGroupName: '/kubernetes/cluster.k8s.informaticslab.co.uk'
