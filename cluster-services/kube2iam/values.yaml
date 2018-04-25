@@ -1,0 +1,10 @@
+host:
+  interface: cbr0
+  iptables: true
+
+extra-args:
+  base-role-arn: OVERRIDEME
+  default-role: OVERRIDEME
+
+rbac:
+  create: true
