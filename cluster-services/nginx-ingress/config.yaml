@@ -1,10 +1,14 @@
-kind: ConfigMap
-apiVersion: v1
-metadata:
-  name: ingress-nginx
-  labels:
-    k8s-addon: ingress-nginx.addons.k8s.io
-  namespace: kube-system
-data:
-  use-proxy-protocol: "true"
-  proxy-body-size: "8m"
+rbac:
+  create: true
+
+controller:
+  kind: DaemonSet
+  service:
+    externalTrafficPolicy: Local
+
+  config:
+    proxy-body-size: 20m
+
+  publishService:
+    enabled: true
+    pathOverride: kube-system/nginx-ingress-controller
