@@ -5,3 +5,7 @@ kubectl create -f secret.yaml
 kubectl create -f config.yaml
 kubectl create -f monitoring.yaml
 ```
+
+```
+helm install stable/prometheus --name prometheus --namespace monitoring -f prometheus.yaml
+```
