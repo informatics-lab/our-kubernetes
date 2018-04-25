@@ -1,0 +1,48 @@
+ingress:
+  enabled: true
+  hosts:
+    - drone.informaticslab.co.uk
+  tls:
+    - hosts:
+      - drone.informaticslab.co.uk
+      secretName: drone.informaticslab.co.uk
+  annotations:
+    kubernetes.io/tls-acme: "true"
+    kubernetes.io/ingress.class: "nginx"
+
+server:
+  env:
+    DRONE_HOST: https://drone.informaticslab.co.uk
+    DRONE_PROVIDER: "github"
+    DRONE_OPEN: "true"
+    DRONE_GITHUB: "true"
+    DRONE_ORGS: OVERRIDEME
+    DRONE_ADMIN: OVERRIDEME
+    DRONE_GITHUB_CLIENT: OVERRIDEME
+    DRONE_GITHUB_SECRET: OVERRIDEME
+  resources:
+    requests:
+      memory: "128Mi"
+      cpu: "100m"
+    limits:
+      memory: "2Gi"
+      cpu: "1000m"
+
+agent:
+  replicas: 3
+  resources:
+    requests:
+      memory: "128Mi"
+      cpu: "100m"
+    limits:
+      memory: "2Gi"
+      cpu: "1000m"
+
+dind: # Docker in docker
+  resources:
+    requests:
+      memory: "128Mi"
+      cpu: "100m"
+    limits:
+      memory: "2Gi"
+      cpu: "1000m"
