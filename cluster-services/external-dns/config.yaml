@@ -1,0 +1,15 @@
+sources:
+  - ingress
+
+provider: aws
+
+aws:
+  secretKey: OVERRIDEME
+  accessKey: OVERRIDEME
+
+txtOwnerId: "k8s"
+
+policy: upsert-only
+
+rbac:
+  create: true
