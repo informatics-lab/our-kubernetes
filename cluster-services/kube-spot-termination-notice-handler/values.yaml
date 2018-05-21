@@ -1,0 +1,10 @@
+# Send notifications to a Slack webhook URL - replace with your own value and uncomment:
+slackUrl: OVERRIDEME
+
+resources:
+  limits:
+    cpu: 100m
+    memory: 128Mi
+  requests:
+    cpu: 100m
+    memory: 128Mi
