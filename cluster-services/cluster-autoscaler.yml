@@ -35,10 +35,11 @@ spec:
             - ./cluster-autoscaler
             - --cloud-provider=aws
             - --expander=most-pods
-            - --nodes=1:10:nodes-eu-west-2a-m4-2xlarge.cluster.k8s.informaticslab.co.uk
-            - --nodes=1:10:nodes-eu-west-2b-m4-2xlarge.cluster.k8s.informaticslab.co.uk
-            - --nodes=1:10:nodes-eu-west-2a-m4-4xlarge.cluster.k8s.informaticslab.co.uk
-            - --nodes=1:10:nodes-eu-west-2b-m4-4xlarge.cluster.k8s.informaticslab.co.uk
+            - --stderrthreshold=info
+            - --nodes=1:10:nodes-eu-west-2a-m5-2xlarge.cluster.k8s.informaticslab.co.uk
+            - --nodes=1:10:nodes-eu-west-2b-m5-2xlarge.cluster.k8s.informaticslab.co.uk
+            - --nodes=1:10:nodes-eu-west-2a-m5-4xlarge.cluster.k8s.informaticslab.co.uk
+            - --nodes=1:10:nodes-eu-west-2b-m5-4xlarge.cluster.k8s.informaticslab.co.uk
           env:
             - name: AWS_REGION
               value: eu-west-2
