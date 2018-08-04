@@ -11,3 +11,10 @@ rbac:
 podAnnotations:
   iam.amazonaws.com/role: "arn:aws:iam::536099501702:role/kubernetes-autoscaler"
   prometheus.io/scrape: 'true'
+
+tolerations:
+  - effect: NoSchedule
+    key: node-role.kubernetes.io/master
+
+nodeSelector:
+  node-role.kubernetes.io/master: ""
