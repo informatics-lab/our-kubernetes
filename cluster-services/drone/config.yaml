@@ -29,6 +29,8 @@ server:
       cpu: "1000m"
 
 agent:
+  annotations:
+    "cluster-autoscaler.kubernetes.io/safe-to-evict": "true"
   replicas: 3
   resources:
     requests:

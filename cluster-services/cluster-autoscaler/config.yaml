@@ -1,0 +1,13 @@
+autoDiscovery:
+  clusterName: 'cluster.k8s.informaticslab.co.uk'
+
+awsRegion: 'eu-west-2'
+
+cloudProvider: 'aws'
+
+rbac:
+  create: true
+
+podAnnotations:
+  iam.amazonaws.com/role: "arn:aws:iam::536099501702:role/kubernetes-autoscaler"
+  prometheus.io/scrape: 'true'
