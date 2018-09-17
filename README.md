@@ -53,57 +53,14 @@ kops edit cluster ${KOPS_CLUSTER_NAME}
 kops update cluster ${KOPS_CLUSTER_NAME} --yes
 ```
 
-### Configure dashboard ui
 
-The basic kubernetes cluster doesn't come with the dashboard already installed so let's add it.
+### Create cluster services
 
-```shell
-kubectl create -f https://git.io/kube-dashboard
-```
+Go through each of the services in `cluster-services` and install as per the `README.md` there.
 
-View the dashboard by running `kubectl proxy` and then visiting http://localhost:8001/api/v1/namespaces/kube-system/services/https:kubernetes-dashboard:/proxy/.
+### Create pod disruption budgets
 
-### Configure ingress
-
-We also probably want to be able to route traffic into the cluster. This ingress controller will create an ELB which will route traffic to an nginx reverse proxy running on the cluster. You can add new services to the reverse proxy using kubernetes ingress.
-
-```shell
-kubectl create -f ./cluster-services/nginx-ingress/config.yaml
-kubectl create -f ./cluster-services/nginx-ingress/ingress.yaml
-kubectl create -f ./cluster-services/nginx-ingress/services.yaml
-```
-
-#### Create ingress DNS entry
-
-Once you've run this you may want to create a domain alias for the ELB which gets created. Perhaps something like `ingress.k8s.informaticslab.co.uk`. This way when you add new services you can simply CNAME the new address to that one, which will cause the traffic to be routed to the ELB and ultimately the nginx reverse proxy.
-
-#### Add Lets Encrypt SSL to ingress
-
-We can also have Lets Encrypt automatically generate SSL certificates for any domain which we add as an ingress. We simply run the `kube-lego` service and it will create a new secret containing the keys when you add a new ingress. Just be sure to create the DNS CNAME and point it to the ingress address before created the ingress in kubernetes otherwise the certificate generation may fail.
-
-```shell
-kubectl create -f ./cluster-services/kube-lego.yaml
-```
-
-### Configure autoscaling
-
-By default this cluster will not scale automatically despite kops creating the nodes in an autoscaling group. This is because you have the flexibility to create your own scaling policies such as cloudwatch alarms. We are going to use the `cluster-autoscaler` services which checks to see if there are any pods which cannot be scheduled because there is nowhere to put them, if so it scaled up the cluster. It also checks to see if there are nodes which are being under utilised and will remove them after a 10 minute period.
-
-```shell
-kubectl apply -f ./cluster-services/cluster-autoscaler.yml
-```
-
-### Configure telemetry and monitoring
-
-We also want to have a telegraf agent running on each node sending telemetry to our central monitoring service.
-
-```shell
-cp ./cluster-services/monitoring/secret.example.yaml ./cluster-services/monitoring/secret.yaml
-# Replace username and password in secret.yaml with base64 encoded values
-kubectl create -f ./cluster-services/monitoring/secret.yaml
-kubectl create configmap telegraf-config --from-file=./cluster-services/monitoring/telegraf.conf  --namespace=kube-system
-kubectl create -f ./cluster-services/monitoring/monitoring.yaml
-```
+Install the pod disruption budgets as per `pod-disruption-budgets/README.md`.
 
 ## Connect to an existing cluster
 
