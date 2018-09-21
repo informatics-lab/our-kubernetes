@@ -77,13 +77,3 @@ You should then be able to use `kubectl`. For example you can list the namespace
 ```shell
 kubectl get ns
 ```
-
-To view the dashboard run
-
-```
-kubectl proxy
-```
-
-Then visit http://127.0.0.1:8001/api/v1/namespaces/kube-system/services/https:kubernetes-dashboard:/proxy/#!/overview?namespace=default
-
-You can skip the auth.
