@@ -14,7 +14,7 @@
 ## Requirements
 
 ```shell
-brew install kops terraform
+brew install kops terraform kubernetes-helm kubectl
 ```
 
 ## Create the cluster
