@@ -1,0 +1,15 @@
+sources:
+  - ingress
+
+provider: aws
+
+txtOwnerId: "k8s"
+
+policy: upsert-only
+
+rbac:
+  create: true
+
+podAnnotations:
+  "cluster-autoscaler.kubernetes.io/safe-to-evict": "true"
+  "iam.amazonaws.com/role": arn:aws:iam::536099501702:role/KubeExternalDNS

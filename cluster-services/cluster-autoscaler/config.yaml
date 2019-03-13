@@ -1,9 +1,12 @@
 autoDiscovery:
-  clusterName: 'cluster.k8s.informaticslab.co.uk'
+  enabled: true
+#   clusterName: 'cluster.k8s.informaticslab.co.uk'
 
 awsRegion: 'eu-west-2'
 
 cloudProvider: 'aws'
+
+sslCertPath: /etc/pki/tls/certs/ca-certificates.crt
 
 rbac:
   create: true
@@ -16,5 +19,5 @@ tolerations:
   - effect: NoSchedule
     key: node-role.kubernetes.io/master
 
-nodeSelector:
-  node-role.kubernetes.io/master: ""
+# nodeSelector:
+#   node-role.kubernetes.io/master: ""

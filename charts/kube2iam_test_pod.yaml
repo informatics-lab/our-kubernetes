@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: kube2iam-test
+  labels:
+    name: kube2iam-test
+  # annotations:
+  #   iam.amazonaws.com/role: arn:aws:iam::536099501702:role/pangeo
+spec:
+  containers:
+  - image: fstab/aws-cli
+    command:
+      - "/home/aws/aws/env/bin/aws"
+      - "s3api"
+      - "list-buckets"
+    name: aws-cli

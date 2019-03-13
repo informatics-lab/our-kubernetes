@@ -1,0 +1,9 @@
+host:
+  interface: weave
+  iptables: true
+
+extraArgs:
+  base-role-arn: arn:aws:iam::536099501702:role/
+
+rbac:
+  create: true
