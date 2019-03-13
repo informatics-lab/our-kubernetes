@@ -1,4 +1,4 @@
-# Kubernetes Terraform
+# Our Kubernetes
 
 * [Requirements](#requirements)
 * [Create the cluster](#create-the-cluster)
