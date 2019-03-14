@@ -12,3 +12,7 @@ assignees: ''
 **as a** person
 **I want** a thing
 **so that** I can do another thing
+
+## Enhancement proposal
+
+Describe your proposed solution to fulfill this requirement.
