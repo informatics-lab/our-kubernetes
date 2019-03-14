@@ -13,4 +13,4 @@ sudo mv /tmp/eksctl /usr/local/bin
 sudo apt-get install jq
 
 # Done!
-echo "we done, boi!"
+echo "### We done, boi! ###"

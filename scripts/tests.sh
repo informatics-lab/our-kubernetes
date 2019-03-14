@@ -1,2 +1,7 @@
+#!/usr/bin/env bash
+
 ## Tests
-echo "We gone tested yo' thing, sir."
+set -ex
+eksctl get cluster
+
+echo "### We gone tested yo' thing, sir. ###"
