@@ -4,14 +4,16 @@
 
 set -ex
 
+# Set name for cluster.
+CLUSTER_NAME="our-kubernetes"
+
 # Check if the cluster already exists before creating a new one.
-CLUSTER_NAME=$(eksctl get cluster | grep -iv name | grep -iv no | awk '{ print $1 }' | head -n 1)
-NG_NAME=$(eksctl get ng --cluster=$CLUSTER_NAME | grep -v CLUSTER | awk '{ print $2 }')
+EXISTING_CLUSTER_NAME=$(eksctl get cluster | grep -iv name | grep -iv no | awk '{ print $1 }' | head -n 1)
 
 # TODO: inherit the number of existing nodes.
 
-# If `CLUSTER_NAME` is empty then we need to create a cluster.
-if [ -z $CLUSTER_NAME ]; then
+# If `CLUSTER_NAME` does not match EXISTING_CLUSTER_NAME then we need to create a cluster.
+if [ $CLUSTER_NAME != ${EXISTING_CLUSTER_NAME+x} ]; then
     # Create cluster without any nodegroups.
     eksctl create cluster -f eksctl_config.yaml
     # In the future a cluster can be initially created without nodegroups.
@@ -22,20 +24,24 @@ if [ -z $CLUSTER_NAME ]; then
     kubectl apply -f "https://cloud.weave.works/k8s/net?k8s-version=$(kubectl version | base64 | tr -d '\n')"
     # Get the name of the newly-created cluster and nodegroups.
     CLUSTER_NAME=$(eksctl get cluster | grep -iv name | awk '{ print $1 }' | head -n 1)
+
     NG_NAMES=$(eksctl get ng --cluster=$CLUSTER_NAME | grep -v CLUSTER | awk '{ print $2 }')
-    NG_ONDEMAND_NAME=$NG_NAMES | grep ondemand
+    NG_ONDEMAND_NAME=$(echo "$NG_NAMES" | grep ondemand)
 
     # Scale the ondemand workers cluster using eksctl.
     eksctl scale nodegroup --cluster=$CLUSTER_NAME --nodes=1 $NG_ONDEMAND_NAME
+else
+    NG_NAMES=$(eksctl get ng --cluster=$CLUSTER_NAME | grep -v CLUSTER | awk '{ print $2 }')
+    NG_ONDEMAND_NAME=$(echo "$NG_NAMES" | grep ondemand)
 fi
 
 # Now create the nodegroups. (For the future...)
 # eksctl create ng -f eksctl_config.yaml
 
 # Get names as variables.
-CLUSTER_STACK_NAME="eksctl-$CLUSTER_NAME-cluster"
-CUSTOMISATION_STACK_NAME="eksctl-$CLUSTER_NAME-customisations"
-NG_STACK_NAME="eksctl-$CLUSTER_NAME-nodegroup-$NG_NAME"
+CLUSTER_STACK_NAME="$CLUSTER_NAME-cluster-stack"
+CUSTOMISATION_STACK_NAME="$CLUSTER_NAME-customisations"
+NG_STACK_NAME="$CLUSTER_NAME-nodegroup-$NG_ONDEMAND_NAME"
 
 # Create (or update) a customisation stack using cloudformation.
 # (NOTE: this command will always fail if the stack doesn't exist or doesn't need updating
@@ -112,7 +118,7 @@ helm upgrade --install --namespace kube-system cert-manager stable/cert-manager 
 
 
 # Install GPU Driver.
-kubectl apply -f https://raw.githubusercontent.com/NVIDIA/k8s-device-plugin/v1.11/nvidia-device-plugin.yml
+# kubectl apply -f https://raw.githubusercontent.com/NVIDIA/k8s-device-plugin/v1.11/nvidia-device-plugin.yml
 
 # Install autoscaler driver.
 helm upgrade --install --namespace kube-system cluster-autoscaler stable/cluster-autoscaler \

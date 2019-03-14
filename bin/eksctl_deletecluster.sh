@@ -1,6 +1,6 @@
 # Script to delete the Pangeo EKS Cluster.
 
-set -e
+set -ex
 
 # Get the names of things to be deleted.
 CLUSTER_NAME=$(eksctl get cluster | grep -iv name | awk '{ print $1 }')

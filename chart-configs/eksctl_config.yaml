@@ -2,7 +2,7 @@ apiVersion: eksctl.io/v1alpha4
 kind: ClusterConfig
 
 metadata:
-  name: eks-cluster-test20
+  name: our-kubernetes
   region: eu-west-2
   tags:
       ServiceCode: ZZTLAB
@@ -10,7 +10,7 @@ metadata:
 
 nodeGroups:
   - name: ng-ondemand-workers
-    instanceType: t2.medium
+    instanceType: t2.small
     volumeSize: 42
     volumeType: gp2
     minSize: 0
@@ -21,15 +21,15 @@ nodeGroups:
     iam:
         withAddonPolicies:
             autoScaler: true
-  - name: ng-gpu-workers
-    instanceType: p3.2xlarge
-    volumeSize: 42
-    volumeType: gp2
-    minSize: 0
-    maxSize: 2
-    desiredCapacity: 0
-    allowSSH: true
-    sshPublicKeyPath: "/Users/DPeterK/.ssh/gateway.pub"
-    iam:
-        withAddonPolicies:
-            autoScaler: true
+  # - name: ng-gpu-workers
+  #   instanceType: p3.2xlarge
+  #   volumeSize: 42
+  #   volumeType: gp2
+  #   minSize: 0
+  #   maxSize: 2
+  #   desiredCapacity: 0
+  #   allowSSH: true
+  #   sshPublicKeyPath: "/Users/DPeterK/.ssh/gateway.pub"
+  #   iam:
+  #       withAddonPolicies:
+  #           autoScaler: true
