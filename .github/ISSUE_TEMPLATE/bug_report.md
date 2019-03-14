@@ -22,3 +22,6 @@ A clear and concise description of what you expected to happen.
 
 ## Additional context
 Add any other context about the problem here.
+
+## Proposed fix
+(Optional) If you have an idea of how to fix it put it here.
