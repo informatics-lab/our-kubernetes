@@ -13,7 +13,7 @@ EXISTING_CLUSTER_NAME=$(eksctl get cluster | grep -iv name | grep -iv no | awk '
 # TODO: inherit the number of existing nodes.
 
 # If `CLUSTER_NAME` does not match EXISTING_CLUSTER_NAME then we need to create a cluster.
-if [ $CLUSTER_NAME != ${EXISTING_CLUSTER_NAME+x} ]; then
+if [[ $CLUSTER_NAME != ${EXISTING_CLUSTER_NAME} ]]; then
     # Create cluster without any nodegroups.
     eksctl create cluster -f eksctl_config.yaml
     # In the future a cluster can be initially created without nodegroups.
@@ -39,9 +39,9 @@ fi
 # eksctl create ng -f eksctl_config.yaml
 
 # Get names as variables.
-CLUSTER_STACK_NAME="$CLUSTER_NAME-cluster-stack"
+CLUSTER_STACK_NAME="eksctl-$CLUSTER_NAME-cluster"
 CUSTOMISATION_STACK_NAME="$CLUSTER_NAME-customisations"
-NG_STACK_NAME="$CLUSTER_NAME-nodegroup-$NG_ONDEMAND_NAME"
+NG_STACK_NAME="eksctl-$CLUSTER_NAME-nodegroup-$NG_ONDEMAND_NAME"
 
 # Create (or update) a customisation stack using cloudformation.
 # (NOTE: this command will always fail if the stack doesn't exist or doesn't need updating
@@ -54,7 +54,7 @@ else
 fi
 
 aws cloudformation $CLO_CMD --stack-name $CUSTOMISATION_STACK_NAME \
-    --template-body file://$PWD/eks_stack_customisation.cfyaml \
+    --template-body file://$PWD/../chart-configs/eks_stack_customisation.cfyaml \
     --capabilities CAPABILITY_IAM \
     --capabilities CAPABILITY_NAMED_IAM \
     --parameters ParameterKey=EKSClusterStackName,ParameterValue=$CLUSTER_STACK_NAME \
@@ -67,7 +67,7 @@ aws cloudformation wait stack-create-complete --stack-name $CUSTOMISATION_STACK_
 EFS_RESOURCE_ID=$(aws cloudformation describe-stack-resources --stack-name $CUSTOMISATION_STACK_NAME | jq ".StackResources[].PhysicalResourceId" | grep "fs-" | sed 's/^"\(.*\)"$/\1/')
 
 # Now add helm and tiller (as a cluster-admin service).
-kubectl apply -f rbac-config.yaml
+kubectl apply -f $PWD/../chart-configs/rbac-config.yaml
 helm init --upgrade --service-account tiller --wait
 
 # Now install all of the things (helm charts)...
@@ -91,13 +91,13 @@ helm upgrade --install --namespace kube-system s3-fuse-deployer informaticslab/s
 
 
 # Add nginx ingress. (https://kubernetes.github.io/ingress-nginx/)
-helm upgrade --install --namespace kube-system nginx-ingress stable/nginx-ingress -f /Users/DPeterK/gh/terraform-kubernetes/cluster-services/nginx-ingress/config.yaml
+helm upgrade --install --namespace kube-system nginx-ingress stable/nginx-ingress -f $PWD/../legacy/cluster-services/nginx-ingress/config.yaml
 
 # Install Kube2IAM. (This is a prerequisite for fluentd cloudwatch.)
-helm upgrade --install --namespace kube-system kube2iam stable/kube2iam -f kube2iam.yaml
+helm upgrade --install --namespace kube-system kube2iam stable/kube2iam -f $PWD/../chart-configs/kube2iam.yaml
 
 # Set up external DNS.
-helm upgrade --install --namespace kube-system external-dns stable/external-dns -f external_dns_config.yaml
+helm upgrade --install --namespace kube-system external-dns stable/external-dns -f $PWD/../chart-configs/external_dns_config.yaml
 
 # Install Certificate Manager.
 kubectl apply -f https://raw.githubusercontent.com/jetstack/cert-manager/release-0.6/deploy/manifests/00-crds.yaml
@@ -123,7 +123,7 @@ helm upgrade --install --namespace kube-system cert-manager stable/cert-manager 
 # Install autoscaler driver.
 helm upgrade --install --namespace kube-system cluster-autoscaler stable/cluster-autoscaler \
              --set autoDiscovery.clusterName=$CLUSTER_NAME \
-             -f /Users/DPeterK/gh/terraform-kubernetes/cluster-services/cluster-autoscaler/config.yaml
+             -f $PWD/../legacy/cluster-services/cluster-autoscaler/config.yaml
 
 # Install dashboard service.
 
