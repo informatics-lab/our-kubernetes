@@ -7,8 +7,8 @@ python:
 install:
   - "$TRAVIS_BUILD_DIR/scripts/setup.sh"
 
-# script:
-  # - bash $TRAVIS_BUILD_DIR/scripts/test-chart.sh
+script:
+  - bash $TRAVIS_BUILD_DIR/scripts/tests.sh
 
 
 
