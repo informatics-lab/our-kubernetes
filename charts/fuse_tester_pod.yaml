@@ -1,0 +1,18 @@
+kind: Pod
+apiVersion: v1
+metadata:
+  name: fuse-mount-debugger
+spec:
+  volumes:
+    - name: s3
+      flexVolume:
+        driver: "informaticslab/pysssix-flex-volume"
+        options:
+          readonly: "true"
+  containers:
+    - name: debugger
+      image: busybox
+      command: ['sleep', '3600']
+      volumeMounts:
+        - mountPath: "/s3"
+          name: volume-to-debug

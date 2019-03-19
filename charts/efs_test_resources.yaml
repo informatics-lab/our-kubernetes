@@ -1,0 +1,44 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: test-efs-thingy
+spec:
+  selector:
+    matchLabels:
+      name: test-efs-thingy
+  template:
+    metadata:
+      labels:
+        name: test-efs-thingy
+    spec:
+      containers:
+      - name: test-pod
+        image: gcr.io/google_containers/busybox:1.24
+        env:
+          - name: POD_NAME
+            valueFrom:
+              fieldRef:
+                fieldPath: metadata.name
+        command:
+          - "/bin/sh"
+        args:
+          - "-c"
+          - "touch /mnt/efs/$POD_NAME && sleep 3600 || exit 1"
+        volumeMounts:
+          - name: efs-pv-volume
+            mountPath: "/mnt/efs"
+      volumes:
+        - name: efs-pv-volume
+          persistentVolumeClaim:
+            claimName: efs-pv-volume
+---
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: efs-pv-volume
+spec:
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 1Mi

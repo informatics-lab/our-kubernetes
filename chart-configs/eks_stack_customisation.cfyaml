@@ -1,0 +1,119 @@
+AWSTemplateFormatVersion: 2010-09-09
+
+Parameters:
+  EKSClusterStackName:
+    Description: "Name of the EKS Cluster to attach the EFS filesystem to."
+    Type: String
+    MinLength : 1
+    MaxLength : 255
+    AllowedPattern : "^[a-zA-Z][-a-zA-Z0-9]*$"
+  EKSDefaultNodegroupStackName:
+    Description: "Name of the default worker nodegroup stack."
+    Type: String
+    MinLength : 1
+    MaxLength : 255
+    AllowedPattern : "^[a-zA-Z][-a-zA-Z0-9]*$"
+
+Resources:
+  EFSForEKS:
+    Type: AWS::EFS::FileSystem
+    Properties:
+      Encrypted: false
+      PerformanceMode: generalPurpose
+      ThroughputMode: bursting
+
+  EFSForEKSMountTarget0:
+    Type: AWS::EFS::MountTarget
+    Properties:
+      FileSystemId:
+        Ref: EFSForEKS
+      SecurityGroups:
+        - { "Fn::ImportValue": { "Fn::Sub": "${EKSClusterStackName}::SharedNodeSecurityGroup" }}
+      SubnetId:
+        { "Fn::Select": ["0",
+          { "Fn::Split": [",",
+            { "Fn::ImportValue":
+              { "Fn::Sub": "${EKSClusterStackName}::SubnetsPrivate" }
+            }]
+          }]
+        }
+  EFSForEKSMountTarget1:
+    Type: AWS::EFS::MountTarget
+    Properties:
+      FileSystemId:
+        Ref: EFSForEKS
+      SecurityGroups:
+        - { "Fn::ImportValue": { "Fn::Sub": "${EKSClusterStackName}::SharedNodeSecurityGroup" }}
+      SubnetId:
+        { "Fn::Select": ["1",
+          { "Fn::Split": [",",
+            { "Fn::ImportValue":
+              { "Fn::Sub": "${EKSClusterStackName}::SubnetsPrivate" }
+            }]
+          }]
+        }
+  EFSForEKSMountTarget2:
+    Type: AWS::EFS::MountTarget
+    Properties:
+      FileSystemId:
+        Ref: EFSForEKS
+      SecurityGroups:
+        - { "Fn::ImportValue": { "Fn::Sub": "${EKSClusterStackName}::SharedNodeSecurityGroup" }}
+      SubnetId:
+        { "Fn::Select": ["2",
+          { "Fn::Split": [",",
+            { "Fn::ImportValue":
+              { "Fn::Sub": "${EKSClusterStackName}::SubnetsPrivate" }
+            }]
+          }]
+        }
+
+  Kube2IAMPolicy:
+    Type: AWS::IAM::Policy
+    Properties:
+      PolicyDocument:
+        {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Action": [
+                "sts:AssumeRole"
+              ],
+              "Effect": "Allow",
+              "Resource": "*"
+            }
+          ]
+        }
+      PolicyName: {"Fn::Sub": "${EKSClusterStackName}-Kube2IAMPolicy"}
+      Roles:
+        - { "Fn::Select": ["1",
+            { "Fn::Split": ["/",
+                { "Fn::ImportValue":
+                  { "Fn::Sub": "${EKSDefaultNodegroupStackName}::InstanceRoleARN" }
+                }]
+              }]
+          }
+
+  ExternalDNSRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Sid": "",
+              "Effect": "Allow",
+              "Principal": {
+                "AWS":
+                  { "Fn::ImportValue":
+                    { "Fn::Sub": "${EKSDefaultNodegroupStackName}::InstanceRoleARN" }
+                  }
+                },
+              "Action": "sts:AssumeRole"
+            }
+          ]
+        }
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/AmazonRoute53FullAccess
+      RoleName: KubeExternalDNS
