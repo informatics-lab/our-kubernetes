@@ -2,7 +2,7 @@
 
 # TODO: add testing.
 
-set -ex
+set -e
 source "$PWD/functions.sh"
 
 
