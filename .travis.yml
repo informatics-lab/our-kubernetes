@@ -8,7 +8,9 @@ before_install:
   - "$TRAVIS_BUILD_DIR/scripts/setup.sh"
 
 install:
-  - "$TRAVIS_BUILD_DIR/bin/create_cluster.sh"
+  - pushd $TRAVIS_BUILD_DIR/bin
+  - ./create_cluster.sh
+  - popd
 
 script:
   - $TRAVIS_BUILD_DIR/scripts/tests.sh
