@@ -4,11 +4,14 @@ language: python
 python:
   - '3.6'
 
-install:
+before_install:
   - "$TRAVIS_BUILD_DIR/scripts/setup.sh"
 
+install:
+  - "$TRAVIS_BUILD_DIR/bin/create_cluster.sh"
+
 script:
-  - bash $TRAVIS_BUILD_DIR/scripts/tests.sh
+  - $TRAVIS_BUILD_DIR/scripts/tests.sh
 
 
 

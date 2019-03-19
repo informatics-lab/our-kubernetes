@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 ## Tests
-set -ex
+set -e
 
 # Assume the our-kubernetes service manager role.
 ROLE_CREDS=$(aws sts assume-role --role-arn "arn:aws:iam::536099501702:role/ourKubernetesServiceManager" \
@@ -13,6 +13,9 @@ export AWS_SESSION_TOKEN=$(echo $ROLE_CREDS | jq .Credentials.SessionToken | xar
 
 # List cluster
 eksctl get cluster
+
+# List nodegroups
+eksctl get ng
 
 # Done!
 echo "### We gone tested yo' thing, sir. ###"

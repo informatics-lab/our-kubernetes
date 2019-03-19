@@ -1,3 +1,7 @@
+#!/usr/bin/env bash
+
+set -e
+
 ## Waaaaaaay smash it
 # Install helm
 curl https://raw.githubusercontent.com/helm/helm/master/scripts/get | bash
