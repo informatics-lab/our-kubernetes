@@ -14,7 +14,7 @@ curl --silent --location "https://github.com/weaveworks/eksctl/releases/download
 sudo mv /tmp/eksctl /usr/local/bin
 
 # Install jq
-pip3 install jq
+sudo apt-get update && sudo apt-get install jq
 
 # Done!
 echo "### We done, boi! ###"

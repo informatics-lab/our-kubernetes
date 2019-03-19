@@ -3,7 +3,7 @@
 # TODO: add testing.
 
 set -ex
-source "functions.sh"
+source "$PWD/functions.sh"
 
 
 # Call the `assume_role` function from `functions.sh`.
@@ -114,7 +114,7 @@ helm upgrade --install --namespace kube-system cert-manager stable/cert-manager 
 
 # Install cloudwatch logs.
 # (fluentd cloudwatch? - https://github.com/helm/charts/tree/master/incubator/fluentd-cloudwatch)
-
+helm upgrade --install --namespace kube-system cloudwatch-log-forwarder incubator/fluentd-cloudwatch -f $PWD/../chart-configs/cloudwatch.yaml
 
 
 # Install Prometheus / Grafana.
