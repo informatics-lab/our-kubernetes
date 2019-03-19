@@ -17,7 +17,7 @@ nodeGroups:
     maxSize: 4
     desiredCapacity: 0
     allowSSH: true
-    sshPublicKeyPath: "~/.ssh/gateway/id-rsa.pub"
+    sshPublicKeyPath: "~/.ssh/id-rsa-gateway.pub"
     iam:
         withAddonPolicies:
             autoScaler: true

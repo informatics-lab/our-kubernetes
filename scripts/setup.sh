@@ -17,8 +17,8 @@ sudo mv /tmp/eksctl /usr/local/bin
 sudo apt-get update && sudo apt-get install jq
 
 # Environment variable of public key to file.
-sudo mkdir -p $HOME/.ssh/gateway
-sudo cat $SSH_PUBLIC_KEY > $HOME/.ssh/gateway/id-rsa.pub
+# sudo mkdir -p $HOME/.ssh/gateway
+sudo cat $SSH_PUBLIC_KEY > $HOME/.ssh/id-rsa-gateway.pub
 
 # Done!
 echo "### We done, boi! ###"
