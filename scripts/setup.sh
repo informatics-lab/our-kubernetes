@@ -6,6 +6,12 @@ set -e
 # Install helm
 curl https://raw.githubusercontent.com/helm/helm/master/scripts/get | bash
 
+# Install kubectl
+KUBECTL_RELEASE=$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)
+curl -LO https://storage.googleapis.com/kubernetes-release/release/$KUBECTL_RELEASE/bin/linux/amd64/kubectl
+chmod +x ./kubectl
+sudo mv ./kubectl /usr/local/bin/kubectl
+
 # Install aswcli
 pip3 install awscli --upgrade
 
