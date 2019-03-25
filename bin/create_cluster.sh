@@ -20,7 +20,7 @@ EXISTING_CLUSTER_NAME=$(eksctl get cluster | grep -iv name | grep -iv no | awk '
 # If `CLUSTER_NAME` does not match EXISTING_CLUSTER_NAME then we need to create a cluster.
 if [[ $CLUSTER_NAME != ${EXISTING_CLUSTER_NAME} ]]; then
     # Create cluster without any nodegroups.
-    eksctl create cluster --name=$CLUSTER_NAME -f $PWD/../chart-configs/eksctl_config.yaml
+    eksctl create cluster -f $PWD/../chart-configs/eksctl_config.yaml
     # In the future a cluster can be initially created without nodegroups.
     # eksctl create cluster -f eksctl_config.yaml --without-nodegroups
 
