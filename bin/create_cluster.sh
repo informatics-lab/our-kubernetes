@@ -14,6 +14,7 @@ CLUSTER_NAME="our-kubernetes"
 
 # Check if the cluster already exists before creating a new one.
 EXISTING_CLUSTER_NAME=$(eksctl get cluster | grep -iv name | grep -iv no | awk '{ print $1 }' | head -n 1)
+echo $EXISTING_CLUSTER_NAME
 
 # TODO: inherit the number of existing nodes.
 
