@@ -3,11 +3,13 @@
 # TODO: add testing.
 
 set -e
-source "$PWD/functions.sh"
-
 
 # Call the `assume_role` function from `functions.sh`.
+source "$PWD/functions.sh"
 assume_role
+
+# Verbosity *after* assuming AWS role.
+set -x
 
 # Set name for cluster.
 CLUSTER_NAME="our-kubernetes"
@@ -77,6 +79,7 @@ kubectl apply -f $PWD/../chart-configs/rbac-config.yaml
 helm init --upgrade --service-account tiller --wait
 
 # Now install all of the things (helm charts)...
+helm repo update
 
 # Install EFS provisioner.
 helm upgrade --install --namespace kube-system efs-provisioner stable/efs-provisioner \
