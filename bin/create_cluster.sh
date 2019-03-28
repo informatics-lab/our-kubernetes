@@ -32,15 +32,20 @@ if [[ $CLUSTER_NAME != ${EXISTING_CLUSTER_NAME} ]]; then
     kubectl apply -f "https://cloud.weave.works/k8s/net?k8s-version=$(kubectl version | base64 | tr -d '\n')"
     # Get the name of the newly-created cluster and nodegroups.
     CLUSTER_NAME=$(eksctl get cluster | grep -iv name | awk '{ print $1 }' | head -n 1)
+    echo $CLUSTER_NAME
 
     NG_NAMES=$(eksctl get ng --cluster=$CLUSTER_NAME | grep -v CLUSTER | awk '{ print $2 }')
     NG_ONDEMAND_NAME=$(echo "$NG_NAMES" | grep ondemand)
+    echo $NG_NAMES
+    echo $NG_ONDEMAND_NAME
 
     # Scale the ondemand workers cluster using eksctl.
     eksctl scale nodegroup --cluster=$CLUSTER_NAME --nodes=1 $NG_ONDEMAND_NAME
 else
     NG_NAMES=$(eksctl get ng --cluster=$CLUSTER_NAME | grep -v CLUSTER | awk '{ print $2 }')
     NG_ONDEMAND_NAME=$(echo "$NG_NAMES" | grep ondemand)
+    echo $NG_NAMES
+    echo $NG_ONDEMAND_NAME
 fi
 
 # Now create the nodegroups. (For the future...)
@@ -73,6 +78,7 @@ set -e
 aws cloudformation wait stack-create-complete --stack-name $CUSTOMISATION_STACK_NAME
 # ... and get the fs name from the cloudformation description, stripping leading and trailing `"` chars.
 EFS_RESOURCE_ID=$(aws cloudformation describe-stack-resources --stack-name $CUSTOMISATION_STACK_NAME | jq ".StackResources[].PhysicalResourceId" | grep "fs-" | sed 's/^"\(.*\)"$/\1/')
+echo $EFS_RESOURCE_ID
 
 # Now add helm and tiller (as a cluster-admin service).
 kubectl apply -f $PWD/../chart-configs/rbac-config.yaml

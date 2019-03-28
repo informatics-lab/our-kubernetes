@@ -2,12 +2,13 @@
 
 # Script to delete the EKS Cluster.
 
-set -ex
+set -e
 source "functions.sh"
-
-
 # Call the `assume_role` function from `functions.sh`.
 assume_role
+
+# Verbosity *after* assuming AWS role.
+set -x
 
 # Get the names of things to be deleted.
 CLUSTER_NAME=$(eksctl get cluster | grep -iv name | awk '{ print $1 }')
