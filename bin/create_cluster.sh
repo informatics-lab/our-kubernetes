@@ -27,17 +27,18 @@ if [[ $CLUSTER_NAME != ${EXISTING_CLUSTER_NAME} ]]; then
     # In the future a cluster can be initially created without nodegroups.
     # eksctl create cluster -f eksctl_config.yaml --without-nodegroups
 
-    # Remove the default (Amazon) network driver and install the weave network driver.
-    kubectl delete ds aws-node -n kube-system
-    kubectl apply -f "https://cloud.weave.works/k8s/net?k8s-version=$(kubectl version | base64 | tr -d '\n')"
     # Get the name of the newly-created cluster and nodegroups.
-    CLUSTER_NAME=$(eksctl get cluster | grep -iv name | awk '{ print $1 }' | head -n 1)
+    CLUSTER_NAME=$(eksctl get cluster | grep -iv name | grep -iv no | awk '{ print $1 }' | head -n 1)
     echo $CLUSTER_NAME
 
     NG_NAMES=$(eksctl get ng --cluster=$CLUSTER_NAME | grep -v CLUSTER | awk '{ print $2 }')
     NG_ONDEMAND_NAME=$(echo "$NG_NAMES" | grep ondemand)
     echo $NG_NAMES
     echo $NG_ONDEMAND_NAME
+
+    # Remove the default (Amazon) network driver and install the weave network driver.
+    kubectl delete ds aws-node -n kube-system
+    kubectl apply -f "https://cloud.weave.works/k8s/net?k8s-version=$(kubectl version | base64 | tr -d '\n')"
 
     # Scale the ondemand workers cluster using eksctl.
     eksctl scale nodegroup --cluster=$CLUSTER_NAME --nodes=1 $NG_ONDEMAND_NAME
