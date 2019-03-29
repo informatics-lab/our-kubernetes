@@ -2,7 +2,10 @@ version: 2
 jobs:
 
   build:
-    # working_directory: ~/github
+    parameters:
+      ssh-public-key:
+        type: env_var_name
+        default: SSH_PUBLIC_KEY
     docker:
       - image: ubuntu:16.04
 
@@ -36,7 +39,7 @@ jobs:
             pip3 install awscli --upgrade
             curl --silent --location "https://github.com/weaveworks/eksctl/releases/download/latest_release/eksctl_$(uname -s)_amd64.tar.gz" | tar xz -C /tmp
             mv /tmp/eksctl /usr/local/bin
-            echo $SSH_PUBLIC_KEY > "~/.ssh/id-rsa-gateway.pub"
+            echo ${<< parameters.ssh-public-key >>} > "~/.ssh/id-rsa-gateway.pub"
 
       - run:
           name: build
