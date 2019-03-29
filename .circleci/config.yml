@@ -13,11 +13,30 @@ jobs:
           name: container_setup
           command: |
             apt-get update
-            apt-get install -y curl python3-pip
+            apt-get install -y curl jq python3-pip
 
       - run:
-          name: setup
-          command: ./scripts/setup.sh
+          name: kubectl_install
+          command: |
+            KUBECTL_RELEASE=$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)
+            curl -LO https://storage.googleapis.com/kubernetes-release/release/$KUBECTL_RELEASE/bin/linux/amd64/kubectl
+            chmod +x ./kubectl
+            mv ./kubectl /usr/local/bin/kubectl
+
+      - run:
+          name: aws-iam-authenticator_install
+          command: |
+            curl -o aws-iam-authenticator https://amazon-eks.s3-us-west-2.amazonaws.com/1.11.5/2018-12-06/bin/linux/amd64/aws-iam-authenticator
+            chmod +x ./aws-iam-authenticator
+            mv ./aws-iam-authenticator /usr/local/bin/aws-iam-authenticator
+
+      - run:
+          name: everything_else_install
+          command: |
+            pip3 install awscli --upgrade
+            curl --silent --location "https://github.com/weaveworks/eksctl/releases/download/latest_release/eksctl_$(uname -s)_amd64.tar.gz" | tar xz -C /tmp
+            mv /tmp/eksctl /usr/local/bin
+            echo $SSH_PUBLIC_KEY > "~/.ssh/id-rsa-gateway.pub"
 
       - run:
           name: build
