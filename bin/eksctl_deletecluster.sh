@@ -14,6 +14,9 @@ set -x
 CLUSTER_NAME=$(eksctl get cluster | grep -iv name | awk '{ print $1 }')
 CUSTOMISATION_STACK_NAME="$CLUSTER_NAME-customisations"
 
+# Get kubeconfig for cluster.
+eksctl utils write-kubeconfig --name $CLUSTER_NAME --region $AWS_DEFAULT_REGION
+
 # List all helm charts and delete them one by one.
 CHART_NAMES=$(helm list | grep -iv name | awk '{ print $1 }')
 echo $CHART_NAMES
