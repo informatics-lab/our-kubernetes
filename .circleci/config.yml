@@ -2,10 +2,6 @@ version: 2.1
 jobs:
 
   build:
-    # parameters:
-    #   ssh-public-key:
-    #     type: env_var_name
-    #     default: SSH_PUBLIC_KEY
     docker:
       - image: ubuntu:16.04
 
@@ -17,6 +13,10 @@ jobs:
           command: |
             apt-get update
             apt-get install -y curl jq python3-pip
+
+      - run:
+          name: helm_install
+          command: curl https://raw.githubusercontent.com/helm/helm/master/scripts/get | bash
 
       - run:
           name: kubectl_install
