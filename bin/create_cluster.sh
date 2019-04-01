@@ -14,9 +14,6 @@ set -x
 # Set name for cluster.
 CLUSTER_NAME="our-kubernetes"
 
-# Get kubeconfig for cluster.
-eksctl utils write-kubeconfig --name $CLUSTER_NAME --region $AWS_DEFAULT_REGION
-
 # Check if the cluster already exists before creating a new one.
 EXISTING_CLUSTER_NAME=$(eksctl get cluster | grep -iv name | grep -iv no | awk '{ print $1 }' | head -n 1)
 echo $EXISTING_CLUSTER_NAME
@@ -50,6 +47,9 @@ else
     NG_ONDEMAND_NAME=$(echo "$NG_NAMES" | grep ondemand)
     echo $NG_NAMES
     echo $NG_ONDEMAND_NAME
+
+    # Get kubeconfig for cluster.
+    eksctl utils write-kubeconfig --name $CLUSTER_NAME --region $AWS_DEFAULT_REGION
 fi
 
 # Now create the nodegroups. (For the future...)
