@@ -86,7 +86,7 @@ echo $EFS_RESOURCE_ID
 
 # Now add helm and tiller (as a cluster-admin service).
 kubectl apply -f $PWD/../chart-configs/rbac-config.yaml
-helm init --upgrade --service-account tiller --wait
+# helm init --upgrade --service-account tiller --wait
 
 # Now install all of the things (helm charts)...
 helm repo update
@@ -130,13 +130,10 @@ helm upgrade --install --namespace kube-system cert-manager stable/cert-manager 
 
 # Install cloudwatch logs.
 # (fluentd cloudwatch? - https://github.com/helm/charts/tree/master/incubator/fluentd-cloudwatch)
-helm upgrade --install --namespace kube-system cloudwatch-log-forwarder incubator/fluentd-cloudwatch -f $PWD/../chart-configs/cloudwatch.yaml
-
+helm upgrade --install --namespace kube-system cloudwatch-log-forwarder incubator/fluentd-cloudwatch -f $PWD/../chart-configs/cloudwatch-logs/values.yaml
 
 # Install Prometheus / Grafana.
-
-
-
+helm upgrade --install --namespace monitoring prometheus stable/prometheus -f $PWD/../chart-configs/monitoring/prometheus.yaml
 
 # Install GPU Driver.
 # kubectl apply -f https://raw.githubusercontent.com/NVIDIA/k8s-device-plugin/v1.11/nvidia-device-plugin.yml

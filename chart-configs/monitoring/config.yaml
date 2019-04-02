@@ -1,0 +1,57 @@
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: telegraf-config
+  namespace: kube-system
+data:
+  telegraf.conf: |-
+    [global_tags]
+      platform = "kubernetes"
+
+
+    [agent]
+      interval = "10s"
+      round_interval = true
+      metric_batch_size = 1000
+      metric_buffer_limit = 10000
+      collection_jitter = "0s"
+      flush_interval = "10s"
+      flush_jitter = "0s"
+      debug = false
+      quiet = false
+      hostname = ""
+      omit_hostname = false
+
+    [[outputs.influxdb]]
+      urls = ["https://ingest.monitor.informaticslab.co.uk"]
+      database = "telegraf"
+      precision = "s"
+      write_consistency = "any"
+      timeout = "5s"
+      username="$INFLUX_DB_INGEST_USER"
+      password="$INFLUX_DB_INGEST_PASS"
+
+    [[inputs.cpu]]
+      percpu = true
+      totalcpu = true
+      fielddrop = ["time_*"]
+
+    [[inputs.disk]]
+      ignore_fs = ["tmpfs", "devtmpfs"]
+
+    [[inputs.diskio]]
+
+    [[inputs.kernel]]
+
+    [[inputs.mem]]
+
+    [[inputs.net]]
+
+    [[inputs.processes]]
+
+    [[inputs.swap]]
+
+    [[inputs.system]]
+
+    [[inputs.docker]]
+      endpoint = "unix:///var/run/docker.sock"
