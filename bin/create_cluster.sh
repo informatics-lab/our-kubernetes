@@ -100,14 +100,16 @@ helm upgrade --install --namespace kube-system efs-provisioner stable/efs-provis
 kubectl patch storageclass gp2 -p '{"metadata": {"annotations": {"storageclass.kubernetes.io/is-default-class": "false"}}}' || true
 kubectl patch storageclass efs -p '{"metadata": {"annotations": {"storageclass.kubernetes.io/is-default-class": "true"}}}' || true
 
-# Install fuse driver.
+# Add chart repos.
+helm repo add incubator https://kubernetes-charts-incubator.storage.googleapis.com/
 helm repo add informaticslab https://charts.informaticslab.co.uk/
 helm repo update
+
+# Install fuse driver.
 helm upgrade --install --namespace kube-system s3-fuse-deployer informaticslab/s3-fuse-flex-volume # -f ...
 
 # Remove temp dir only if it exists...
 [ -z ${FUSE_TMP_DIR+filler_str} ] || rm -rf $FUSE_TMP_DIR
-
 
 # Add nginx ingress. (https://kubernetes.github.io/ingress-nginx/)
 helm upgrade --install --namespace kube-system nginx-ingress stable/nginx-ingress -f $PWD/../legacy/cluster-services/nginx-ingress/config.yaml
