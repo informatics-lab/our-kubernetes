@@ -44,6 +44,7 @@ jobs:
 
       - run:
           name: build
+          no_output_timeout: "25m"
           command: |
             cd bin
             ./create_cluster.sh
@@ -52,25 +53,3 @@ jobs:
       - run:
           name: test
           command: ./scripts/tests.sh
-
-
-
-# deploy:
-# - provider: script
-#   skip_cleanup: true
-#   script: bash $TRAVIS_BUILD_DIR/scripts/deploy.sh dev pangeo-dev.informaticslab.co.uk
-#     pangeo-dev
-#   on:
-#     branch: master
-# - provider: script
-#   skip_cleanup: true
-#   script: bash $TRAVIS_BUILD_DIR/scripts/deploy.sh hackathon pangeo-hackathon.informaticslab.co.uk
-#     pangeo-hackathon
-#   on:
-#     branch: master
-# - provider: script
-#   skip_cleanup: true
-#   script: bash $TRAVIS_BUILD_DIR/scripts/deploy.sh prod jupyterhub.informaticslab.co.uk
-#     jupyter
-#   on:
-#     tags: true
