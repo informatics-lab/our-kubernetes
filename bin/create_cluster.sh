@@ -87,13 +87,13 @@ echo $EFS_RESOURCE_ID
 # Add rbac authentication.
 kubectl apply -f $PWD/../chart-configs/rbac-config.yaml
 
+# Now add helm and tiller (as a cluster-admin service).
+helm init --upgrade --service-account tiller --wait
+
 # Add helm chart repos.
 helm repo add incubator https://kubernetes-charts-incubator.storage.googleapis.com/
 helm repo add informaticslab https://charts.informaticslab.co.uk/
 helm repo update
-
-# Now add helm and tiller (as a cluster-admin service).
-helm init --upgrade --service-account tiller --wait
 
 # Install EFS provisioner.
 helm upgrade --install --namespace kube-system efs-provisioner stable/efs-provisioner \
