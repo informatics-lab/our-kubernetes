@@ -84,12 +84,16 @@ aws cloudformation wait stack-create-complete --stack-name $CUSTOMISATION_STACK_
 EFS_RESOURCE_ID=$(aws cloudformation describe-stack-resources --stack-name $CUSTOMISATION_STACK_NAME | jq ".StackResources[].PhysicalResourceId" | grep "fs-" | sed 's/^"\(.*\)"$/\1/')
 echo $EFS_RESOURCE_ID
 
-# Now add helm and tiller (as a cluster-admin service).
+# Add rbac authentication.
 kubectl apply -f $PWD/../chart-configs/rbac-config.yaml
-# helm init --upgrade --service-account tiller --wait
 
-# Now install all of the things (helm charts)...
+# Add helm chart repos.
+helm repo add incubator https://kubernetes-charts-incubator.storage.googleapis.com/
+helm repo add informaticslab https://charts.informaticslab.co.uk/
 helm repo update
+
+# Now add helm and tiller (as a cluster-admin service).
+helm init --upgrade --service-account tiller --wait
 
 # Install EFS provisioner.
 helm upgrade --install --namespace kube-system efs-provisioner stable/efs-provisioner \
@@ -100,16 +104,8 @@ helm upgrade --install --namespace kube-system efs-provisioner stable/efs-provis
 kubectl patch storageclass gp2 -p '{"metadata": {"annotations": {"storageclass.kubernetes.io/is-default-class": "false"}}}' || true
 kubectl patch storageclass efs -p '{"metadata": {"annotations": {"storageclass.kubernetes.io/is-default-class": "true"}}}' || true
 
-# Add chart repos.
-helm repo add incubator https://kubernetes-charts-incubator.storage.googleapis.com/
-helm repo add informaticslab https://charts.informaticslab.co.uk/
-helm repo update
-
 # Install fuse driver.
-helm upgrade --install --namespace kube-system s3-fuse-deployer informaticslab/s3-fuse-flex-volume # -f ...
-
-# Remove temp dir only if it exists...
-[ -z ${FUSE_TMP_DIR+filler_str} ] || rm -rf $FUSE_TMP_DIR
+helm upgrade --install --namespace kube-system s3-fuse-deployer informaticslab/s3-fuse-flex-volume
 
 # Add nginx ingress. (https://kubernetes.github.io/ingress-nginx/)
 helm upgrade --install --namespace kube-system nginx-ingress stable/nginx-ingress -f $PWD/../legacy/cluster-services/nginx-ingress/config.yaml
@@ -144,7 +140,6 @@ helm upgrade --install --namespace kube-system cluster-autoscaler stable/cluster
              -f $PWD/../legacy/cluster-services/cluster-autoscaler/config.yaml
 
 # Install dashboard service.
-
-
+helm upgrade --install --namespace kube-system kube-dashboard stable/kubernetes-dashboard -f $PWD/../chart-configs/dashboard.yaml
 
 # Add spot integration.
