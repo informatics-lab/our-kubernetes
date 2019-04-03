@@ -128,8 +128,10 @@ helm upgrade --install --namespace kube-system cert-manager stable/cert-manager 
 # (fluentd cloudwatch? - https://github.com/helm/charts/tree/master/incubator/fluentd-cloudwatch)
 helm upgrade --install --namespace kube-system cloudwatch-log-forwarder incubator/fluentd-cloudwatch -f $PWD/../chart-configs/cloudwatch-logs/values.yaml
 
-# Install Prometheus / Grafana.
+# Install Prometheus, Heapster and Grafana.
 helm upgrade --install --namespace monitoring prometheus stable/prometheus -f $PWD/../chart-configs/monitoring/prometheus.yaml
+helm upgrade --install --namespace monitoring heapster stable/heapster --set rbac.create=true
+# helm upgrade --install --namespace monitoring grafana stable/grafana
 
 # Install GPU Driver.
 # kubectl apply -f https://raw.githubusercontent.com/NVIDIA/k8s-device-plugin/v1.11/nvidia-device-plugin.yml
