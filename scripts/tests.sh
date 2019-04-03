@@ -18,6 +18,9 @@ ALL_PODS=$(kubectl get pods --all-namespaces | grep -iv namespace)
 N_TOTAL_PODS=$(echo $ALL_PODS | wc -l)
 N_RUNNING_PODS=$(echo $ALL_PODS | grep -i running | wc -l)
 
+echo "Total number of pods: $N_TOTAL_PODS"
+echo "Total number of running pods: $N_RUNNING_PODS"
+
 if [ $N_TOTAL_PODS -ne $N_RUNNING_PODS ]; then
     echo "Not all pods are running!"
     exit 1
