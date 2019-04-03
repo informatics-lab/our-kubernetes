@@ -16,6 +16,7 @@ nodeGroups:
     minSize: 0
     maxSize: 4
     desiredCapacity: 0
+    maxPodsPerNode: 100
     allowSSH: true
     sshPublicKeyPath: "~/.ssh/id-rsa-gateway.pub"
     iam:
@@ -28,6 +29,7 @@ nodeGroups:
   #   minSize: 0
   #   maxSize: 2
   #   desiredCapacity: 0
+  #   maxPodsPerNode: 100
   #   allowSSH: true
   #   sshPublicKeyPath: "/Users/DPeterK/.ssh/gateway.pub"
   #   iam:
