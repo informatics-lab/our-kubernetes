@@ -11,7 +11,7 @@ assume_role
 eksctl get cluster
 
 # List nodegroups
-eksctl get ng
+eksctl get ng --cluster=$(eksctl get cluster | grep -iv name | grep -iv no | awk '{ print $1 }' | head -n 1)
 
 # Done!
 echo "### We gone tested yo' thing, sir. ###"
