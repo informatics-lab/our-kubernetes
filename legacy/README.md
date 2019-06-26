@@ -53,10 +53,22 @@ kops edit cluster ${KOPS_CLUSTER_NAME}
 kops update cluster ${KOPS_CLUSTER_NAME} --yes
 ```
 
+### Cluster services prerequisite: install helm and tiller
+
+Before we can install any of the services in `cluster-services` we need to install helm and tiller; the client- and server-side kubernetes package manager components:
+
+```shell
+# Set up service account for tiller.
+kubectl -n kube-system create serviceaccount tiller
+kubectl create clusterrolebinding tiller --clusterrole cluster-admin --serviceaccount=kube-system:tiller
+
+# Now initialise helm with tiller as a service account role.
+helm init --service-account tiller
+```
 
 ### Create cluster services
 
-Go through each of the services in `cluster-services` and install as per the `README.md` there.
+Now go through each of the services in `cluster-services` and install as per the `README.md` there.
 
 ### Create pod disruption budgets
 
