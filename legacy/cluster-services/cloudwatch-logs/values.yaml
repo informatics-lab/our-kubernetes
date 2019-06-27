@@ -1,8 +1,9 @@
 rbac:
   create: true
 
-image: 'informaticslab/fluentd-kubernetes-daemonset'
-imageTag: 'v0.12-alpine-cloudwatch'
+image:
+  repository: 'informaticslab/fluentd-kubernetes-daemonset'
+  tag: 'v0.12-alpine-cloudwatch'
 imagePullPolicy: Always
 
 awsRegion: 'eu-west-2'
