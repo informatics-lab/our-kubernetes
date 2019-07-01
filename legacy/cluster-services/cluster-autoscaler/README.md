@@ -1,5 +1,5 @@
 ```
-ln -s /path/to/drone/secrets.yaml secrets.yaml
+ln -s /path/to/secrets/cluster-autoscaler/secrets.yaml secrets.yaml
 helm install stable/cluster-autoscaler --name cluster-autoscaler --namespace kube-system -f config.yaml -f secrets.yaml
 ```
 
