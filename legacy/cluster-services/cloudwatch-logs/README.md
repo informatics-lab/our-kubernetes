@@ -1,5 +1,10 @@
 # CloudWatch Log Forwarder
 
+Deps:
+```
+helm repo add incubator https://kubernetes-charts-incubator.storage.googleapis.com/
+```
+
 ```
 ln -s /path/to/cloudwatch-logs/secrets.yaml secrets.yaml
 
