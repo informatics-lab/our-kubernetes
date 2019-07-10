@@ -1,0 +1,19 @@
+autoDiscovery:
+  enabled: true
+
+awsRegion: 'eu-west-2'
+
+cloudProvider: 'aws'
+
+sslCertPath: /etc/pki/tls/certs/ca-certificates.crt
+
+rbac:
+  create: true
+
+podAnnotations:
+  iam.amazonaws.com/role: "arn:aws:iam::536099501702:role/kubernetes-autoscaler"
+  prometheus.io/scrape: "true"
+
+tolerations:
+  - effect: NoSchedule
+    key: node-role.kubernetes.io/master

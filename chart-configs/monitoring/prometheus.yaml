@@ -1,3 +1,6 @@
+rbac:
+  create: true
+
 server:
   ingress:
     ## If true, Prometheus server Ingress will be created

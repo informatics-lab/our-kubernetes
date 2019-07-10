@@ -55,11 +55,6 @@ fi
 # Now create the nodegroups. (For the future...)
 # eksctl create ng -f eksctl_config.yaml
 
-# Get names as variables.
-CLUSTER_STACK_NAME="eksctl-$CLUSTER_NAME-cluster"
-CUSTOMISATION_STACK_NAME="$CLUSTER_NAME-customisations"
-NG_STACK_NAME="eksctl-$CLUSTER_NAME-nodegroup-$NG_ONDEMAND_NAME"
-
 # Create (or update) a customisation stack using cloudformation.
 # (NOTE: this command will always fail if the stack doesn't exist or doesn't need updating
 #        (this is what we're testing for, so don't exit on this command failing.)
@@ -124,6 +119,12 @@ helm upgrade --install --namespace kube-system cert-manager stable/cert-manager 
              --set ingressShim.defaultIssuerName=letsencrypt \
              --set ingressShim.defaultIssuerKind=ClusterIssuer
 
+# Get names as variables.
+CLUSTER_STACK_NAME="eksctl-$CLUSTER_NAME-cluster"
+CUSTOMISATION_STACK_NAME="$CLUSTER_NAME-customisations"
+NG_STACK_NAME="eksctl-$CLUSTER_NAME-nodegroup-$NG_ONDEMAND_NAME"
+
+
 # Install cloudwatch logs.
 # (fluentd cloudwatch? - https://github.com/helm/charts/tree/master/incubator/fluentd-cloudwatch)
 helm upgrade --install --namespace kube-system cloudwatch-log-forwarder incubator/fluentd-cloudwatch -f $PWD/../chart-configs/cloudwatch-logs/values.yaml
@@ -138,8 +139,8 @@ helm upgrade --install --namespace monitoring heapster stable/heapster --set rba
 
 # Install autoscaler driver.
 helm upgrade --install --namespace kube-system cluster-autoscaler stable/cluster-autoscaler \
-             --set autoDiscovery.clusterName=$CLUSTER_NAME \
-             -f $PWD/../legacy/cluster-services/cluster-autoscaler/config.yaml
+             --set autoDiscovery.clusterName=$NG_ONDEMAND_NAME \
+             -f $PWD/../chart-configs/cluster-autoscaler.yaml
 
 # Install dashboard service.
 helm upgrade --install --namespace kube-system kube-dashboard stable/kubernetes-dashboard -f $PWD/../chart-configs/dashboard.yaml

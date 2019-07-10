@@ -13,6 +13,9 @@ eksctl get cluster
 # List nodegroups
 eksctl get ng --cluster=$(eksctl get cluster | grep -iv name | grep -iv no | awk '{ print $1 }' | head -n 1)
 
+# List pods
+kubectl get pods --all-namespace
+
 # Check all pods are running.
 ALL_PODS=$(kubectl get pods --all-namespaces | grep -iv namespace)
 N_TOTAL_PODS=$(echo $ALL_PODS | wc -l)
