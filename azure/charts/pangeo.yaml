@@ -1,0 +1,66 @@
+# Pangeo configuration values
+# --------------------
+# The following configuration options are specifically for the custom Pangeo components.
+# Some values will be inherited into the dependent chart configs. See requirements.yaml for info.
+
+# Create and use roles and service accounts on an RBAC enabled cluster.
+rbac:
+  enabled: true
+
+
+# Dependency configuration values
+# -------------------------------
+# To configure dependencies you must create a key with the name of the dependency
+# and then configure as per the dependent chart's values.yaml. Don't forget to indent!
+
+jupyterhub:
+  # Helm config for jupyterhub goes here
+  # See https://github.com/jupyterhub/zero-to-jupyterhub-k8s/blob/master/jupyterhub/values.yaml
+
+  ingress:
+    enabled: true
+    annotations:
+      kubernetes.io/tls-acme: "true"
+      kubernetes.io/ingress.class: "nginx"
+
+  proxy:
+    secretToken: 3b09b440ad47ed2797ae4a0099df8bad9f32a5d16139fe818a56b81c09ee1eb4
+    service:
+      type: LoadBalancer
+
+  hub:
+    cookieSecret: 331005ebb1ae734520ba4865975ee3a31cbd93ba44dc77314138dcf0a6e559a4
+
+  singleuser:
+    image:
+      name: informaticslab/pangeo-notebook
+      tag: 0.5.21
+    defaultUrl: "/lab"
+    cmd: jupyter-labhub
+    serviceAccountName: daskkubernetes
+    cpu:
+      limit: 2
+      guarantee: 1
+    memory:
+      limit: 16G
+      guarantee: 2G
+    extraEnv:
+      EXAMPLES_GIT_URL: https://github.com/informatics-lab/example-notebooks.git
+  prePuller:
+    continuous:
+      enabled: true
+  # optimizations: see https://zero-to-jupyterhub.readthedocs.io/en/latest/optimization.html?highlight=scheduling#optimizations
+  scheduling:
+    userScheduler:
+      enabled: true
+      replicas: 2
+    podPriority:
+      enabled: true
+    userPlaceholder:
+      enabled: true
+      replicas: 2
+  auth:
+    type: dummy
+  cull:
+    enabled: true
+    timeout: 3600

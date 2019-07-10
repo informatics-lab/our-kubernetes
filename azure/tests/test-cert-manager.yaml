@@ -1,0 +1,36 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: cert-manager-test
+---
+apiVersion: certmanager.k8s.io/v1alpha1
+kind: Issuer
+metadata:
+  name: test-selfsigned
+  namespace: cert-manager-test
+spec:
+  selfSigned: {}
+---
+apiVersion: certmanager.k8s.io/v1alpha1
+kind: Certificate
+metadata:
+  name: selfsigned-cert
+  namespace: cert-manager-test
+spec:
+  commonName: example.com
+  secretName: selfsigned-cert-tls
+  issuerRef:
+    name: test-selfsigned
+
+# To use this...
+#
+# # Create the test resources
+# kubectl apply -f test-resources.yaml
+#
+# # Check the status of the newly created certificate
+# # You may need to wait a few seconds before cert-manager processes the
+# # certificate request
+# kubectl describe certificate -n cert-manager-test
+# 
+# # Clean up the test resources
+# kubectl delete -f test-resources.yaml

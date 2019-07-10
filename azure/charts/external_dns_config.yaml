@@ -1,0 +1,18 @@
+sources:
+  - ingress
+
+provider: aws
+
+aws:
+  accessKey: AKIAXZUQFG2DBUZ4V665
+  secretKey: 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
+
+txtOwnerId: "k8s"
+
+policy: upsert-only
+
+rbac:
+  create: true
+
+podAnnotations:
+  "cluster-autoscaler.kubernetes.io/safe-to-evict": "true"

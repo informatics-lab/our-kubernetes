@@ -1,0 +1,14 @@
+rbac:
+  create: true
+
+controller:
+  kind: DaemonSet
+  service:
+    externalTrafficPolicy: Local
+
+  config:
+    proxy-body-size: 20m
+
+  publishService:
+    enabled: true
+    pathOverride: kube-system/nginx-ingress-controller
