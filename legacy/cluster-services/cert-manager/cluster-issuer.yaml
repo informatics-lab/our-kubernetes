@@ -6,11 +6,14 @@ metadata:
 spec:
   acme:
     # The ACME server URL
-    server: https://acme-v01.api.letsencrypt.org/directory
+    server: https://acme-v02.api.letsencrypt.org/directory
     # Email address used for ACME registration
-    email: jacob.tomlinson@informaticslab.co.uk
+    email: peter.killick@informaticslab.co.uk
     # Name of a secret used to store the ACME account private key from step 3
     privateKeySecretRef:
       name: lab-letsencrypt-private-key
     # Enable the HTTP-01 challenge provider
-    http01: {}
+    solvers:
+    - http01:
+        ingress:
+          class: nginx

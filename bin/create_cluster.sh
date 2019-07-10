@@ -2,18 +2,21 @@
 
 # TODO: add testing.
 
-set -ex
-source "functions.sh"
-
+set -e
 
 # Call the `assume_role` function from `functions.sh`.
+source "$PWD/functions.sh"
 assume_role
+
+# Verbosity *after* assuming AWS role.
+set -x
 
 # Set name for cluster.
 CLUSTER_NAME="our-kubernetes"
 
 # Check if the cluster already exists before creating a new one.
 EXISTING_CLUSTER_NAME=$(eksctl get cluster | grep -iv name | grep -iv no | awk '{ print $1 }' | head -n 1)
+echo $EXISTING_CLUSTER_NAME
 
 # TODO: inherit the number of existing nodes.
 
@@ -24,29 +27,33 @@ if [[ $CLUSTER_NAME != ${EXISTING_CLUSTER_NAME} ]]; then
     # In the future a cluster can be initially created without nodegroups.
     # eksctl create cluster -f eksctl_config.yaml --without-nodegroups
 
-    # Remove the default (Amazon) network driver and install the weave network driver.
-    kubectl delete ds aws-node -n kube-system
-    kubectl apply -f "https://cloud.weave.works/k8s/net?k8s-version=$(kubectl version | base64 | tr -d '\n')"
     # Get the name of the newly-created cluster and nodegroups.
-    CLUSTER_NAME=$(eksctl get cluster | grep -iv name | awk '{ print $1 }' | head -n 1)
+    CLUSTER_NAME=$(eksctl get cluster | grep -iv name | grep -iv no | awk '{ print $1 }' | head -n 1)
+    echo $CLUSTER_NAME
 
     NG_NAMES=$(eksctl get ng --cluster=$CLUSTER_NAME | grep -v CLUSTER | awk '{ print $2 }')
     NG_ONDEMAND_NAME=$(echo "$NG_NAMES" | grep ondemand)
+    echo $NG_NAMES
+    echo $NG_ONDEMAND_NAME
+
+    # Remove the default (Amazon) network driver and install the weave network driver.
+    kubectl delete ds aws-node -n kube-system
+    kubectl apply -f "https://cloud.weave.works/k8s/net?k8s-version=$(kubectl version | base64 | tr -d '\n')"
 
     # Scale the ondemand workers cluster using eksctl.
     eksctl scale nodegroup --cluster=$CLUSTER_NAME --nodes=1 $NG_ONDEMAND_NAME
 else
     NG_NAMES=$(eksctl get ng --cluster=$CLUSTER_NAME | grep -v CLUSTER | awk '{ print $2 }')
     NG_ONDEMAND_NAME=$(echo "$NG_NAMES" | grep ondemand)
+    echo $NG_NAMES
+    echo $NG_ONDEMAND_NAME
+
+    # Get kubeconfig for cluster.
+    eksctl utils write-kubeconfig --name $CLUSTER_NAME --region $AWS_DEFAULT_REGION
 fi
 
 # Now create the nodegroups. (For the future...)
 # eksctl create ng -f eksctl_config.yaml
-
-# Get names as variables.
-CLUSTER_STACK_NAME="eksctl-$CLUSTER_NAME-cluster"
-CUSTOMISATION_STACK_NAME="$CLUSTER_NAME-customisations"
-NG_STACK_NAME="eksctl-$CLUSTER_NAME-nodegroup-$NG_ONDEMAND_NAME"
 
 # Create (or update) a customisation stack using cloudformation.
 # (NOTE: this command will always fail if the stack doesn't exist or doesn't need updating
@@ -70,12 +77,18 @@ set -e
 aws cloudformation wait stack-create-complete --stack-name $CUSTOMISATION_STACK_NAME
 # ... and get the fs name from the cloudformation description, stripping leading and trailing `"` chars.
 EFS_RESOURCE_ID=$(aws cloudformation describe-stack-resources --stack-name $CUSTOMISATION_STACK_NAME | jq ".StackResources[].PhysicalResourceId" | grep "fs-" | sed 's/^"\(.*\)"$/\1/')
+echo $EFS_RESOURCE_ID
+
+# Add rbac authentication.
+kubectl apply -f $PWD/../chart-configs/rbac-config.yaml
 
 # Now add helm and tiller (as a cluster-admin service).
-kubectl apply -f $PWD/../chart-configs/rbac-config.yaml
 helm init --upgrade --service-account tiller --wait
 
-# Now install all of the things (helm charts)...
+# Add helm chart repos.
+helm repo add incubator https://kubernetes-charts-incubator.storage.googleapis.com/
+helm repo add informaticslab https://charts.informaticslab.co.uk/
+helm repo update
 
 # Install EFS provisioner.
 helm upgrade --install --namespace kube-system efs-provisioner stable/efs-provisioner \
@@ -87,13 +100,7 @@ kubectl patch storageclass gp2 -p '{"metadata": {"annotations": {"storageclass.k
 kubectl patch storageclass efs -p '{"metadata": {"annotations": {"storageclass.kubernetes.io/is-default-class": "true"}}}' || true
 
 # Install fuse driver.
-helm repo add informaticslab https://charts.informaticslab.co.uk/
-helm repo update
-helm upgrade --install --namespace kube-system s3-fuse-deployer informaticslab/s3-fuse-flex-volume # -f ...
-
-# Remove temp dir only if it exists...
-[ -z ${FUSE_TMP_DIR+filler_str} ] || rm -rf $FUSE_TMP_DIR
-
+helm upgrade --install --namespace kube-system s3-fuse-deployer informaticslab/s3-fuse-flex-volume
 
 # Add nginx ingress. (https://kubernetes.github.io/ingress-nginx/)
 helm upgrade --install --namespace kube-system nginx-ingress stable/nginx-ingress -f $PWD/../legacy/cluster-services/nginx-ingress/config.yaml
@@ -112,26 +119,30 @@ helm upgrade --install --namespace kube-system cert-manager stable/cert-manager 
              --set ingressShim.defaultIssuerName=letsencrypt \
              --set ingressShim.defaultIssuerKind=ClusterIssuer
 
+# Get names as variables.
+CLUSTER_STACK_NAME="eksctl-$CLUSTER_NAME-cluster"
+CUSTOMISATION_STACK_NAME="$CLUSTER_NAME-customisations"
+NG_STACK_NAME="eksctl-$CLUSTER_NAME-nodegroup-$NG_ONDEMAND_NAME"
+
+
 # Install cloudwatch logs.
 # (fluentd cloudwatch? - https://github.com/helm/charts/tree/master/incubator/fluentd-cloudwatch)
+helm upgrade --install --namespace kube-system cloudwatch-log-forwarder incubator/fluentd-cloudwatch -f $PWD/../chart-configs/cloudwatch-logs/values.yaml
 
-
-
-# Install Prometheus / Grafana.
-
-
-
+# Install Prometheus, Heapster and Grafana.
+helm upgrade --install --namespace monitoring prometheus stable/prometheus -f $PWD/../chart-configs/monitoring/prometheus.yaml
+helm upgrade --install --namespace monitoring heapster stable/heapster --set rbac.create=true
+# helm upgrade --install --namespace monitoring grafana stable/grafana
 
 # Install GPU Driver.
 # kubectl apply -f https://raw.githubusercontent.com/NVIDIA/k8s-device-plugin/v1.11/nvidia-device-plugin.yml
 
 # Install autoscaler driver.
 helm upgrade --install --namespace kube-system cluster-autoscaler stable/cluster-autoscaler \
-             --set autoDiscovery.clusterName=$CLUSTER_NAME \
-             -f $PWD/../legacy/cluster-services/cluster-autoscaler/config.yaml
+             --set autoDiscovery.clusterName=$NG_ONDEMAND_NAME \
+             -f $PWD/../chart-configs/cluster-autoscaler.yaml
 
 # Install dashboard service.
-
-
+helm upgrade --install --namespace kube-system kube-dashboard stable/kubernetes-dashboard -f $PWD/../chart-configs/dashboard.yaml
 
 # Add spot integration.
