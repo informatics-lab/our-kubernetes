@@ -19,7 +19,7 @@ pushd /Users/DPeterK/gh/our-pangeo
 # Get dependencies
 helm dependency update jadepangeo
 # Install pangeo
-helm upgrade --install --namespace=panzure panzure.informaticslab.co.uk jadepangeo -f env/azure/values.yaml -f env/azure/secrets.yaml
+helm upgrade --install --namespace=$ENV $ENV.informaticslab.co.uk jadepangeo -f env/$ENV/values.yaml -f env/$ENV/secrets.yaml
 
 popd
 

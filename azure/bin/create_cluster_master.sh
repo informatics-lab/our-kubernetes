@@ -48,13 +48,9 @@ az aks create \
   --client-secret $SERVICE_PRINCIPAL_PASSWD \
   --location $RESOURCE_LOCATION \
   --kubernetes-version 1.12.8 \
-  --node-vm-size Standard_B4ms \
+  --node-vm-size Standard_B8ms \
   --enable-vmss \
   --node-count 1
-
-# Wait for the cluster to complete creating (?)
-# NOTE: shouldn't be needed because `no-wait` is not set in the previous command.
-# az aks wait -g $RESOURCE_GROUP_NAME -n $RESOURCE_NAME
 
 
 # # # # #

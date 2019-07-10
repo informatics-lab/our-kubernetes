@@ -12,9 +12,10 @@ az aks create \
   --name $RESOURCE_NAME \
   --location $RESOURCE_LOCATION \
   --kubernetes-version 1.12.8 \
-  --node-vm-size Standard_B4ms \
+  --node-vm-size Standard_B8ms \
   --enable-vmss \
   --node-count 1
+  # --nodepool-name master
 
 
 # # # # #

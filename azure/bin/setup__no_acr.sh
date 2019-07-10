@@ -5,22 +5,17 @@ set -ex
 # Create an autoscaling Azure Kubernetes Service resource.
 
 # Global variables.
-export RESOURCE_LOCATION="westeurope"
-# export RESOURCE_LOCATION="uksouth"
-# export RESOURCE_GROUP_NAME="1st_wednesday"
+export RESOURCE_LOCATION="uksouth"
 export RESOURCE_NAME="pangeo"
-export CLUSTER_GROUP_NAME="our-pangeo-azure"
-# export CLUSTER_GROUP_NAME="1st_wednesday"
+export CLUSTER_GROUP_NAME="1st_wednesday"
 export CONTAINER_NAME="ourpangeo"
 export PANGEO_VER="our-pangeo"
-export SERVICE_PRINCIPAL_NAME="our-pangeo-sp"
+export ENV="azure"
 
 # Run the individual elements of the AKS resource setup process.
 # ./create_cluster_master__no_acr.sh
 # ./create_cluster_nodes__no_acr.sh
-./create_cluster_master.sh
-./create_cluster_nodes.sh
-./add_helm.sh
+# ./add_helm.sh
 ./add_pangeo.sh
 
 

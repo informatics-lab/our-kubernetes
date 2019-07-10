@@ -27,12 +27,12 @@ az aks get-credentials -g $CLUSTER_GROUP_NAME -n $RESOURCE_NAME --overwrite-exis
 #       --max-count 20
 # done
 
-# Set up standard nodes in AZ1-3.
+# Set up a standard worker nodepool.
 az aks nodepool add \
   --resource-group $CLUSTER_GROUP_NAME \
   --cluster-name $RESOURCE_NAME \
-  --name "${RESOURCE_NAME}n${AZ_NUM}" \
-  --node-vm-size Standard_B12ms \
+  --name "${RESOURCE_NAME}nodes" \
+  --node-vm-size Standard_B16ms \
   --enable-cluster-autoscaler \
   --node-count 1 \
   --min-count 1 \

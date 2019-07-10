@@ -23,7 +23,8 @@ helm init --upgrade --service-account tiller --wait
 
 # Install helm charts to customise the cluster.
 helm upgrade --install --namespace kube-system external-dns stable/external-dns \
-             -f ../charts/external_dns_config.yaml
+             -f ../charts/external_dns_config.yaml \
+             -f ../charts/azure-secrets.yaml
 helm upgrade --install --namespace kube-system nginx-ingress stable/nginx-ingress \
              -f ../charts/nginx-ingress-config.yaml
 
