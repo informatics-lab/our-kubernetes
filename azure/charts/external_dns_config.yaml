@@ -4,8 +4,8 @@ sources:
 provider: aws
 
 aws:
-  accessKey: AKIAXZUQFG2DBUZ4V665
-  secretKey: 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
+  accessKey: OVERRIDEME
+  secretKey: OVERRIDEME
 
 txtOwnerId: "k8s"
 
