@@ -4,7 +4,7 @@ set -ex
 
 #####
 # Create an Azure Kubernetes Service resource group and the cluster master.
-####
+#####
 
 # Create a service principal for the cluster to interact with other Azure resources.
 # NOTE: this typically only lasts for one year.
@@ -52,6 +52,11 @@ az aks create \
   --enable-vmss \
   --node-count 1
 
+# Create the ACI connector to connect the cluster to virtual nodes.
+az aks install-connector \
+  --name $RESOURCE_NAME \
+  --resource-group $CLUSTER_GROUP_NAME \
+  --connector-name "virtual-nodes-connector"
 
 # # # # #
 #

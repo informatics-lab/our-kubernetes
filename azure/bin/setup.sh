@@ -11,6 +11,7 @@ export RESOURCE_NAME="pangeo"  # TODO: change to `panzure`.
 export CLUSTER_GROUP_NAME="our-pangeo-azure"
 export CONTAINER_NAME="ourpangeo"
 export SERVICE_PRINCIPAL_NAME="our-pangeo-sp"
+export ACR_SECRET_NAME="acr-container-auth"
 export ENV="panzure"
 
 # Run the individual elements of the AKS resource setup process.
