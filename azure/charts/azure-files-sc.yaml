@@ -3,6 +3,7 @@ apiVersion: storage.k8s.io/v1
 metadata:
   name: azurefile
 provisioner: kubernetes.io/azure-file
+reclaimPolicy: Retain
 mountOptions:
   - dir_mode=0777
   - file_mode=0777
@@ -10,3 +11,5 @@ mountOptions:
   - gid=1000
 parameters:
   skuName: Standard_LRS
+  location: uksouth
+  storageAccount: pangeoazuresa

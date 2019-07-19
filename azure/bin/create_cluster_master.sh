@@ -87,7 +87,9 @@ az aks install-connector \
 #      (have you recently updated the CLI version?).
 #      You may also need to register the provider: 'az provider register -n Microsoft.ContainerService'.
 #      This may also be caused by trying to run the command in an unsupported region?
-#
+#    * Operations failing randomly
+#      May well be due to a race condition with the previous operation finishing. Give it 5min and try again.
+#      You may also need to delete infrastructure created by the failing command and run the command again to ensure a clean state.
 # # # # #
 
 

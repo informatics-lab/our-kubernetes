@@ -10,10 +10,6 @@ set -ex
 # Get kubernetes credentials for AKS resource.
 az aks get-credentials -g $CLUSTER_GROUP_NAME -n $RESOURCE_NAME --overwrite-existing
 
-# Add file storage.
-kubectl apply -f ../charts/azure-files-sc.yaml
-kubectl apply -f ../charts/azure-pvc-roles.yaml
-
 # Create dashboard rbac config.
 kubectl apply -f ../charts/dashboard_rbac.yaml
 

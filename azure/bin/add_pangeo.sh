@@ -14,7 +14,7 @@ helm repo add pangeo https://pangeo-data.github.io/helm-chart/
 helm repo update
 
 # Install pangeo.
-pushd /Users/DPeterK/gh/our-pangeo
+pushd $PANGEO_CONFIG_PATH
 
 # Get dependencies
 helm dependency update jadepangeo
