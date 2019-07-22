@@ -3,7 +3,7 @@
 set -e
 
 #####
-# Generate azure-specific secrets for the pangeo helm chart.
+# Generate azure-specific secrets for pulling the pangeo docker image.
 # Can't use Azure AD yet; see
 # https://docs.microsoft.com/en-us/azure/aks/virtual-nodes-portal#known-limitations
 #####
@@ -12,7 +12,7 @@ set -e
 while test $# -gt 0; do
     case "$1" in
         -h|--help)
-            echo "$package - Generate azure-specific secrets for the pangeo helm chart."
+            echo "$package - Generate azure-specific secrets for pulling the Informatics Lab pangeo docker image."
             echo " "
             echo "$package [options] application [arguments]"
             echo " "

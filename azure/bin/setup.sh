@@ -5,8 +5,8 @@ set -ex
 # Create an autoscaling Azure Kubernetes Service resource.
 
 # Global variables.
-# export RESOURCE_LOCATION="westeurope"
-export RESOURCE_LOCATION="uksouth"
+export RESOURCE_LOCATION="westeurope"
+# export RESOURCE_LOCATION="uksouth"
 export RESOURCE_NAME="pangeo"  # TODO: change to `panzure`.
 export CLUSTER_GROUP_NAME="our-pangeo-azure"
 export STORAGE_ACCT_NAME="pangeoazuresa"
