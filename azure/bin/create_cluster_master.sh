@@ -11,7 +11,59 @@ if [ $(az group exists --resource-group ${CLUSTER_GROUP_NAME}) == "false" ]; the
     az group create --name $CLUSTER_GROUP_NAME --location $RESOURCE_LOCATION
 fi
 
+# Set up a virtual network for the virtual nodes.
+VNET_NAME=panzureVnet
+SUBNET_AKS_NAME=panzureSubnet
+SUBNET_VK_NAME=panzureSubnetVK
+
+az network vnet create \
+    --resource-group $CLUSTER_GROUP_NAME \
+    --name $VNET_NAME \
+    --address-prefixes 10.0.0.0/8 \
+    --subnet-name $SUBNET_AKS_NAME \
+    --subnet-prefix 10.240.0.0/16
+
+# Create additional subnet for the virtual nodes.
+az network vnet subnet create \
+    --resource-group $CLUSTER_GROUP_NAME \
+    --vnet-name $VNET_NAME \
+    --name $SUBNET_VK_NAME \
+    --address-prefixes 10.241.0.0/16
+
+# Create a service principal for the vnet.
+SERVICE_PRINCIPAL_PASSWD=$(az ad sp create-for-rbac \
+                              --skip-assignment \
+                              --name http://$SERVICE_PRINCIPAL_NAME \
+                              --query password \
+                              --output tsv)
+SERVICE_PRINCIPAL_APPID=$(az ad sp show \
+                             --id http://$SERVICE_PRINCIPAL_NAME \
+                             --query appId \
+                             --output tsv)
+
+# Get the ID of the vnet.
+VNET_ID=$(az network vnet show \
+            --resource-group $CLUSTER_GROUP_NAME \
+            --name $VNET_NAME \
+            --query id \
+            --output tsv)
+
+# Create a role assignment to allow other commands to contribute to the vnet.
+az role assignment create \
+  --assignee $SERVICE_PRINCIPAL_APPID \
+  --scope $VNET_ID \
+  --role Contributor
+
+# Get the ID of the AKS subnet (created with the vnet).
+SUBNET_AKS_ID=$(az network vnet subnet show \
+                  --resource-group $CLUSTER_GROUP_NAME \
+                  --vnet-name $VNET_NAME \
+                  --name $SUBNET_AKS_NAME \
+                  --query id \
+                  --output tsv)
+
 # Create the AKS cluster master.
+# Note: remove cluster autoscaler first if everything explodes.
 az aks create \
   --resource-group $CLUSTER_GROUP_NAME \
   --name $RESOURCE_NAME \
@@ -19,14 +71,24 @@ az aks create \
   --kubernetes-version 1.12.8 \
   --node-vm-size Standard_B8ms \
   --enable-vmss \
-  --node-count 1
+  --enable-cluster-autoscaler \
+  --node-count 1 \
+  --min-count 1 \
+  --max-count 10 \
+  --network-plugin azure \
+  --service-cidr 10.0.0.0/16 \
+  --dns-service-ip 10.0.0.10 \
+  --docker-bridge-address 172.17.0.1/16 \
+  --vnet-subnet-id $SUBNET_AKS_ID \
+  --service-principal $SERVICE_PRINCIPAL_APPID \
+  --client-secret "bae70b92-25d4-4635-bc90-ca1f6d545a13"
 
-# Create the ACI connector to connect the cluster to virtual nodes.
-az aks install-connector \
-  --name $RESOURCE_NAME \
-  --resource-group $CLUSTER_GROUP_NAME \
-  --service-principal 
-  --connector-name "virtual-nodes-connector"
+# Enable the virtual nodes add-on.
+az aks enable-addons \
+    --resource-group $CLUSTER_GROUP_NAME \
+    --name $RESOURCE_NAME \
+    --addons virtual-node \
+    --subnet-name $SUBNET_VK_NAME
 
 # # # # #
 #
