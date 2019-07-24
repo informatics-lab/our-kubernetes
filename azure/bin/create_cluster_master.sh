@@ -30,6 +30,14 @@ az network vnet subnet create \
     --name $SUBNET_VK_NAME \
     --address-prefixes 10.241.0.0/16
 
+# Check for a service principal that matches the one we're about to set up,
+# and delete it if it exists.
+EXISTING_SP_ID=$(az ad sp list \
+                  --query "[?servicePrincipalNames[0] == 'http://$SERVICE_PRINCIPAL_NAME'].appId" \
+                  --output tsv)
+
+[ ! -z ${EXISTING_SP_ID+x} ] && az ad sp delete --id $EXISTING_SP_ID
+
 # Create a service principal for the vnet.
 SERVICE_PRINCIPAL_PASSWD=$(az ad sp create-for-rbac \
                               --skip-assignment \
@@ -40,6 +48,15 @@ SERVICE_PRINCIPAL_APPID=$(az ad sp show \
                              --id http://$SERVICE_PRINCIPAL_NAME \
                              --query appId \
                              --output tsv)
+
+# Wait for the service principal to create.
+SP_EXISTS=0
+while [ $SP_EXISTS -eq 0 ]; do
+    EXISTING_SP_ID=$(az ad sp list \
+                       --query "[?servicePrincipalNames[0] == 'http://$SERVICE_PRINCIPAL_NAME'].appId" \
+                       --output tsv)
+    [ ! -z ${EXISTING_SP_ID+x} ] && SP_EXISTS=1
+done
 
 # Get the ID of the vnet.
 VNET_ID=$(az network vnet show \
@@ -81,7 +98,7 @@ az aks create \
   --docker-bridge-address 172.17.0.1/16 \
   --vnet-subnet-id $SUBNET_AKS_ID \
   --service-principal $SERVICE_PRINCIPAL_APPID \
-  --client-secret "bae70b92-25d4-4635-bc90-ca1f6d545a13"
+  --client-secret $SERVICE_PRINCIPAL_PASSWD
 
 # Enable the virtual nodes add-on.
 az aks enable-addons \
