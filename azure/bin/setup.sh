@@ -20,6 +20,7 @@ export ENV="pangeo-azure"
 # ./create_cluster_master.sh
 # ./create_cluster_nodes.sh
 # ./create_cluster_storage.sh
+./gen_azure_secrets.sh -g $CLUSTER_GROUP_NAME -n $RESOURCE_NAME
 # ./add_helm.sh
 ./add_pangeo.sh
 
