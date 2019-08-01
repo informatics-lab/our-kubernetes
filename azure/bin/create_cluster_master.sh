@@ -12,9 +12,9 @@ if [ $(az group exists --resource-group ${CLUSTER_GROUP_NAME}) == "false" ]; the
 fi
 
 # Set up a virtual network for the virtual nodes.
-VNET_NAME=panzureVnet
-SUBNET_AKS_NAME=panzureSubnet
-SUBNET_VK_NAME=panzureSubnetVK
+VNET_NAME="panzureVnet"
+SUBNET_AKS_NAME="panzureSubnet"
+SUBNET_VK_NAME="panzureSubnetVK"
 
 az network vnet create \
     --resource-group $CLUSTER_GROUP_NAME \
@@ -36,27 +36,20 @@ EXISTING_SP_ID=$(az ad sp list \
                   --query "[?servicePrincipalNames[0] == 'http://$SERVICE_PRINCIPAL_NAME'].appId" \
                   --output tsv)
 
-[ ! -z ${EXISTING_SP_ID+x} ] && az ad sp delete --id $EXISTING_SP_ID
+[ ! -z ${EXISTING_SP_ID} ] && az ad sp delete --id $EXISTING_SP_ID
 
 # Create a service principal for the vnet.
-SERVICE_PRINCIPAL_PASSWD=$(az ad sp create-for-rbac \
-                              --skip-assignment \
-                              --name http://$SERVICE_PRINCIPAL_NAME \
-                              --query password \
-                              --output tsv)
-SERVICE_PRINCIPAL_APPID=$(az ad sp show \
-                             --id http://$SERVICE_PRINCIPAL_NAME \
-                             --query appId \
-                             --output tsv)
-
-# Wait for the service principal to create.
-SP_EXISTS=0
-while [ $SP_EXISTS -eq 0 ]; do
-    EXISTING_SP_ID=$(az ad sp list \
-                       --query "[?servicePrincipalNames[0] == 'http://$SERVICE_PRINCIPAL_NAME'].appId" \
-                       --output tsv)
-    [ ! -z ${EXISTING_SP_ID+x} ] && SP_EXISTS=1
-done
+SUBSCRIPTION_ID=$(az account list --query "[].id" --output tsv)
+CLIENT_SECRET=$(az ad sp create-for-rbac \
+                  --name http://$SERVICE_PRINCIPAL_NAME \
+                  --role contributor \
+                  --scopes /subscriptions/$SUBSCRIPTION_ID/resourceGroups/$CLUSTER_GROUP_NAME \
+                  --query password \
+                  --output tsv)
+CLIENT_ID=$(az ad sp show \
+              --id http://$SERVICE_PRINCIPAL_NAME \
+              --query appId \
+              --output tsv)
 
 # Get the ID of the vnet.
 VNET_ID=$(az network vnet show \
@@ -67,7 +60,7 @@ VNET_ID=$(az network vnet show \
 
 # Create a role assignment to allow other commands to contribute to the vnet.
 az role assignment create \
-  --assignee $SERVICE_PRINCIPAL_APPID \
+  --assignee $CLIENT_ID \
   --scope $VNET_ID \
   --role Contributor
 
@@ -97,8 +90,8 @@ az aks create \
   --dns-service-ip 10.0.0.10 \
   --docker-bridge-address 172.17.0.1/16 \
   --vnet-subnet-id $SUBNET_AKS_ID \
-  --service-principal $SERVICE_PRINCIPAL_APPID \
-  --client-secret $SERVICE_PRINCIPAL_PASSWD
+  --service-principal $CLIENT_ID \
+  --client-secret $CLIENT_SECRET
 
 # Enable the virtual nodes add-on.
 az aks enable-addons \

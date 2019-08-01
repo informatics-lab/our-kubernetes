@@ -15,7 +15,7 @@ kubectl apply -f ../charts/dashboard_rbac.yaml
 
 # Install and update helm and tiller.
 kubectl apply -f ../charts/helm_rbac.yaml
-helm init --upgrade --service-account tiller --wait
+helm init --upgrade --service-account tiller --node-selectors "agentpool"="nodepool1" --wait
 
 # Install helm charts to customise the cluster.
 helm upgrade --install --namespace kube-system external-dns stable/external-dns \

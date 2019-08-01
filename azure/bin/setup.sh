@@ -13,15 +13,15 @@ export STORAGE_ACCT_NAME="pangeoazuresa"
 export CONTAINER_NAME="ourpangeo"
 export SERVICE_PRINCIPAL_NAME="pangeo-sp-vk"
 export ACR_SECRET_NAME="acr-container-auth"
-export PANGEO_CONFIG_PATH=""
-export ENV="panzure"
+export PANGEO_CONFIG_PATH="/Users/DPeterK/gh/our-pangeo"
+export ENV="pangeo-azure"
 
 # Run the individual elements of the AKS resource setup process.
-./create_cluster_master.sh
+# ./create_cluster_master.sh
 # ./create_cluster_nodes.sh
 # ./create_cluster_storage.sh
 # ./add_helm.sh
-# ./add_pangeo.sh
+./add_pangeo.sh
 
 
 # To access the kubernetes dashboard...
