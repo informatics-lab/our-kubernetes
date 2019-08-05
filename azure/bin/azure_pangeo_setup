@@ -1,0 +1,78 @@
+#!/usr/bin/env bash
+
+set -ex
+
+#####
+# Create an autoscaling Azure Kubernetes Service resource.
+#####
+
+# Handle command-line flags.
+
+# Set default behaviour.
+MASTER=0
+NODES=0
+STORAGE=0
+HELM=0
+PANGEO=0
+
+# Parse command-line flags.
+while [[ "$#" -gt 0 ]]; do 
+    case $1 in
+        -h|--help)
+            echo "$package - Set up an azure kubernetes cluster."
+            echo " "
+            echo "$package [options] application [arguments]"
+            echo " "
+            echo "options:"
+            echo "-h, --help                    show this help and exit"
+            echo "-c, --config-path             path to `our-pangeo` config repo"
+            echo "-a, --all                     set up all elements of kubernetes cluster. Implies `-mnslp`"
+            echo "-m, --master                  set up cluster master"
+            echo "-n, --nodes                   set up cluster nodes"
+            echo "-s, --storage                 set up cluster storage"
+            echo "-l, --helm                    add helm to cluster"
+            echo "-p, --pangeo                  add Pangeo to cluster"
+            exit 0
+            ;;
+        -c|--config-path) CONFIG_PATH="$2"; shift;;
+        -a|--all)
+            MASTER=1
+            NODES=1
+            STORAGE=1
+            HELM=1
+            PANGEO=1
+            ;;
+        -m|--master) MASTER=1 ;;
+        -n|--nodes) NODES=1 ;;
+        -s|--storage) STORAGE=1 ;;
+        -l|--helm) HELM=1 ;;
+        -p|--pangeo) PANGEO=1 ;;
+        *) echo "Unknown parameter passed: $1"; exit 1 ;;
+    esac
+    shift
+done
+
+# Global variables.
+export RESOURCE_LOCATION="westeurope"
+# export RESOURCE_LOCATION="uksouth"
+export RESOURCE_NAME="pangeo"  # TODO: change to `panzure`.
+export CLUSTER_GROUP_NAME="our-pangeo-azure"
+export STORAGE_ACCT_NAME="pangeoazuresa"
+export CONTAINER_NAME="ourpangeo"
+export ACR_GROUP_NAME="lab-pangeo-images"
+export SERVICE_PRINCIPAL_NAME="our-pangeo-sp"
+export ACR_SECRET_NAME="acr-container-auth"
+export PANGEO_CONFIG_PATH=CONFIG_PATH
+export ENV="panzure"
+
+# Run the individual elements of the AKS resource setup process.
+[[ $MASTER -eq 1 ]] && ./create_cluster_master.sh
+[[ $NODES -eq 1 ]] && ./create_cluster_nodes.sh
+[[ $STORAGE -eq 1 ]] && ./create_cluster_storage.sh
+[[ $HELM -eq 1 ]] && ./add_helm.sh
+[[ $PANGEO -eq 1 ]] && ./add_pangeo.sh
+
+
+# To access the kubernetes dashboard...
+# az aks browse -g 1st_wednesday -n as-practice
+# az aks browse -g $RESOURCE_GROUP_NAME -n $RESOURCE_NAME
