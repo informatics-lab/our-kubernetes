@@ -80,7 +80,6 @@ az aks create \
   --location $RESOURCE_LOCATION \
   --kubernetes-version 1.12.8 \
   --node-vm-size Standard_B8ms \
-  --enable-vmss \
   --enable-cluster-autoscaler \
   --node-count 1 \
   --min-count 1 \
@@ -91,7 +90,8 @@ az aks create \
   --docker-bridge-address 172.17.0.1/16 \
   --vnet-subnet-id $SUBNET_AKS_ID \
   --service-principal $CLIENT_ID \
-  --client-secret $CLIENT_SECRET
+  --client-secret $CLIENT_SECRET \
+  --generate-ssh-keys
 
 # Enable the virtual nodes add-on.
 az aks enable-addons \
