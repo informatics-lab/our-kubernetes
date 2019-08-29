@@ -60,7 +60,7 @@ done
 export RESOURCE_LOCATION="westeurope"
 # export RESOURCE_LOCATION="uksouth"
 export RESOURCE_NAME="pangeo"  # TODO: change to `panzure`.
-export CLUSTER_GROUP_NAME="our-pangeo-azure"
+export CLUSTER_GROUP_NAME="pangeo-azure-vk"
 export STORAGE_ACCT_NAME="pangeoazuresa"
 export CONTAINER_NAME="ourpangeo"
 export ACR_GROUP_NAME="lab-pangeo-images"

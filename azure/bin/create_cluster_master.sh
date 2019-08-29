@@ -78,12 +78,13 @@ az aks create \
   --resource-group $CLUSTER_GROUP_NAME \
   --name $RESOURCE_NAME \
   --location $RESOURCE_LOCATION \
-  --kubernetes-version 1.12.8 \
+  --kubernetes-version 1.15.0 \
   --node-vm-size Standard_B8ms \
   --enable-cluster-autoscaler \
   --node-count 1 \
   --min-count 1 \
   --max-count 10 \
+  --enable-vmss \
   --network-plugin azure \
   --service-cidr 10.0.0.0/16 \
   --dns-service-ip 10.0.0.10 \
