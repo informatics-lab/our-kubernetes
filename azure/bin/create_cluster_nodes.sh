@@ -48,6 +48,3 @@ az aks nodepool add \
 #   --node-count 1 \
 #   --min-count 1 \
 #   --max-count 3
-
-# Check our nodepools.
-az aks nodepool list -g $CLUSTER_GROUP_NAME -n $RESOURCE_NAME -o table
