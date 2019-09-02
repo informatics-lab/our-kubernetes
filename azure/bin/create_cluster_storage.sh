@@ -16,20 +16,21 @@ az aks get-credentials -g $CLUSTER_GROUP_NAME -n $RESOURCE_NAME --overwrite-exis
 
 # XXX: The storage account needs to be created in the "shadow resource group".
 #      See https://github.com/Azure/AKS/issues/91.
-# SHADOW_RG_NAME="MC_${CLUSTER_GROUP_NAME}_${RESOURCE_NAME}_${RESOURCE_LOCATION}"
+SHADOW_RG_NAME="MC_${CLUSTER_GROUP_NAME}_${RESOURCE_NAME}_${RESOURCE_LOCATION}"
+
 STORAGE_ACCT_GROUP=$(az storage account list \
                        --query "[?name == '$STORAGE_ACCT_NAME'].resourceGroup" \
                        --output tsv)
 
 # Check for an existing azure storage account for Pangeo, and create it if missing.
 EXISTING_SA_NAMES=$(az storage account list \
-                      --resource-group $STORAGE_ACCT_GROUP \
+                      --resource-group $SHADOW_RG_NAME \
                       --query "[].name | join(',', @)")
 
 if [[ ! $EXISTING_SA_NAMES =~ $STORAGE_ACCT_NAME ]]; then
     az storage account create \
         --name $STORAGE_ACCT_NAME \
-        --resource-group $STORAGE_ACCT_GROUP \
+        --resource-group $SHADOW_RG_NAME \
         --location $RESOURCE_LOCATION \
         --sku Standard_LRS \
         --kind StorageV2

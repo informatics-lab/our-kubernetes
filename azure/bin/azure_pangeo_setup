@@ -66,7 +66,7 @@ export CONTAINER_NAME="ourpangeo"
 export ACR_GROUP_NAME="lab-pangeo-images"
 export SERVICE_PRINCIPAL_NAME="our-pangeo-sp"
 export ACR_SECRET_NAME="acr-container-auth"
-export PANGEO_CONFIG_PATH=CONFIG_PATH
+export PANGEO_CONFIG_PATH=$CONFIG_PATH
 export ENV="panzure"
 
 # Run the individual elements of the AKS resource setup process.

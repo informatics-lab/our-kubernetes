@@ -78,7 +78,7 @@ az aks create \
   --resource-group $CLUSTER_GROUP_NAME \
   --name $RESOURCE_NAME \
   --location $RESOURCE_LOCATION \
-  --kubernetes-version 1.15.0 \
+  --kubernetes-version 1.14.6 \
   --node-vm-size Standard_B8ms \
   --enable-cluster-autoscaler \
   --node-count 1 \
