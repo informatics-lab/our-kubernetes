@@ -26,10 +26,11 @@ while [[ "$#" -gt 0 ]]; do
             echo "options:"
             echo "-h, --help                    show this help and exit"
             echo "-c, --config-path             path to `our-pangeo` config repo"
-            echo "-a, --all                     set up all elements of kubernetes cluster. Implies `-mnslp`"
+            echo "-a, --all                     set up all elements of kubernetes cluster. Implies `-mnsxlp`"
             echo "-m, --master                  set up cluster master"
             echo "-n, --nodes                   set up cluster nodes"
             echo "-s, --storage                 set up cluster storage"
+            echo "-x, --secrets                 set up container registry image pull secret for cluster"
             echo "-l, --helm                    add helm to cluster"
             echo "-p, --pangeo                  add Pangeo to cluster"
             exit 0
@@ -39,12 +40,14 @@ while [[ "$#" -gt 0 ]]; do
             MASTER=1
             NODES=1
             STORAGE=1
+            SECRETS=1
             HELM=1
             PANGEO=1
             ;;
         -m|--master) MASTER=1 ;;
         -n|--nodes) NODES=1 ;;
         -s|--storage) STORAGE=1 ;;
+        -x|--secrets) SECRETS=1 ;;
         -l|--helm) HELM=1 ;;
         -p|--pangeo) PANGEO=1 ;;
         *) echo "Unknown parameter passed: $1"; exit 1 ;;
@@ -69,6 +72,7 @@ export ENV="panzure"
 [[ $MASTER -eq 1 ]] && ./create_cluster_master.sh
 [[ $NODES -eq 1 ]] && ./create_cluster_nodes.sh
 [[ $STORAGE -eq 1 ]] && ./create_cluster_storage.sh
+[[ $SECRETS -eq 1 ]] && ./create_cluster_secrets.sh
 [[ $HELM -eq 1 ]] && ./add_helm.sh
 [[ $PANGEO -eq 1 ]] && ./add_pangeo.sh
 
