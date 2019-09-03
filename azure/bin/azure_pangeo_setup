@@ -12,6 +12,7 @@ set -ex
 MASTER=0
 NODES=0
 STORAGE=0
+SECRETS=0
 HELM=0
 PANGEO=0
 
@@ -58,14 +59,14 @@ done
 # Global variables.
 export RESOURCE_LOCATION="westeurope"
 # export RESOURCE_LOCATION="uksouth"
-export RESOURCE_NAME="pangeo-azure"
-export CLUSTER_GROUP_NAME="our-pangeo-azure"
-export STORAGE_ACCT_NAME="pangeoazuresa"
+export RESOURCE_NAME="pangeo-k8s"
+export CLUSTER_GROUP_NAME="pangeo-cluster"
+export STORAGE_ACCT_NAME="pangeosa"
 export CONTAINER_NAME="ourpangeo"
 export ACR_GROUP_NAME="lab-pangeo-images"
-export SERVICE_PRINCIPAL_NAME="our-pangeo-sp"
+export SERVICE_PRINCIPAL_NAME="pangeo-sp"
 export ACR_SECRET_NAME="acr-container-auth"
-export PANGEO_CONFIG_PATH=CONFIG_PATH
+export PANGEO_CONFIG_PATH=$CONFIG_PATH
 export ENV="pangeo-azure"
 
 # Run the individual elements of the AKS resource setup process.
