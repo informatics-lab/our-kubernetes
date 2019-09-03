@@ -12,4 +12,4 @@ mountOptions:
 parameters:
   skuName: Standard_LRS
   location: uksouth
-  storageAccount: pangeoazuresa
+  storageAccount: pangeosa
