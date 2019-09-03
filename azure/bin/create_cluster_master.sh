@@ -15,8 +15,6 @@ fi
 az aks create \
   --resource-group $CLUSTER_GROUP_NAME \
   --name $RESOURCE_NAME \
-  --service-principal $SERVICE_PRINCIPAL_APPID \
-  --client-secret $SERVICE_PRINCIPAL_PASSWD \
   --location $RESOURCE_LOCATION \
   --kubernetes-version 1.14.6 \
   --node-vm-size Standard_B8ms \

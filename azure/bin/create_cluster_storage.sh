@@ -36,4 +36,4 @@ fi
 kubectl apply -f ../charts/azure-files-sc.yaml
 kubectl apply -f ../charts/azure-pvc-roles.yaml
 # ... and for scratch - in the pangeo namespace.
-kubectl apply -f ../charts/azure-file-pvc-scratch.yaml -n $ENV
+kubectl apply -f ../charts/azure-file-pvc-scratch.yaml -n $ENV  # TODO: create NS if it doesn't exist.
