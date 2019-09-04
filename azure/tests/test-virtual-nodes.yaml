@@ -1,28 +1,35 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: aci-helloworld
+  name: dask-worker-pull-test
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: aci-helloworld
+      app: dask-worker-pull-test
   template:
     metadata:
       labels:
-        app: aci-helloworld
+        app: dask-worker-pull-test
     spec:
       containers:
-      - name: aci-helloworld
-        image: microsoft/aci-helloworld
-        ports:
-        - containerPort: 80
+      - name: dask-worker
+        image: informaticslab/pangeo-notebook:0.8.1
+        args: [dask-worker, --nthreads, '1', --no-bokeh, --memory-limit, 6GB, --death-timeout, '60']
+        resources:
+          limits:
+            cpu: "1"
+            memory: 4G
+      imagePullSecrets:
+      - name: acr-secret
       nodeSelector:
         kubernetes.io/role: agent
         beta.kubernetes.io/os: linux
         type: virtual-kubelet
       tolerations:
       - key: virtual-kubelet.io/provider
-        operator: Exists
-      - key: azure.com/aci
+        operator: Equal
+        value: azure
         effect: NoSchedule
+      - key: node.kubernetes.io/unreachable
+        operator: Exists
