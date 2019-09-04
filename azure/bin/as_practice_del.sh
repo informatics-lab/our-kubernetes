@@ -6,7 +6,7 @@ set -ex
 
 # Global variables.
 RESOURCE_GROUP_NAME="1st_wednesday"
-RESOURCE_NAME="as-practice"
+CLUSTER_NAME="as-practice"
 
 
 CHART_NAMES=$(helm list | grep -iv name | awk '{ print $1 }')
@@ -16,4 +16,4 @@ for CHART_NAME in $CHART_NAMES; do
     helm delete --purge $CHART_NAME
 done
 
-az aks delete -g $RESOURCE_GROUP_NAME -n $RESOURCE_NAME -y
+az aks delete -g $RESOURCE_GROUP_NAME -n $CLUSTER_NAME -y

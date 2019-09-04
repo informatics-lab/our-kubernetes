@@ -12,9 +12,8 @@ set -ex
 MASTER=0
 NODES=0
 STORAGE=0
-SECRETS=0
 HELM=0
-PANGEO=0
+RESOURE_GROUP_NAME="k8"
 
 # Parse command-line flags.
 while [[ "$#" -gt 0 ]]; do 
@@ -31,9 +30,8 @@ while [[ "$#" -gt 0 ]]; do
             echo "-m, --master                  set up cluster master"
             echo "-n, --nodes                   set up cluster nodes"
             echo "-s, --storage                 set up cluster storage"
-            echo "-x, --secrets                 set up container registry image pull secret for cluster"
             echo "-l, --helm                    add helm to cluster"
-            echo "-p, --pangeo                  add Pangeo to cluster"
+            echo "-r, --resource-group <name>   set the name of the resource group to create cluster in"
             exit 0
             ;;
         -c|--config-path) CONFIG_PATH="$2"; shift;;
@@ -41,16 +39,14 @@ while [[ "$#" -gt 0 ]]; do
             MASTER=1
             NODES=1
             STORAGE=1
-            SECRETS=1
             HELM=1
-            PANGEO=1
             ;;
         -m|--master) MASTER=1 ;;
         -n|--nodes) NODES=1 ;;
         -s|--storage) STORAGE=1 ;;
-        -x|--secrets) SECRETS=1 ;;
         -l|--helm) HELM=1 ;;
         -p|--pangeo) PANGEO=1 ;;
+        -r|--resource-group) RESOURE_GROUP_NAME="$2"; shift;;
         *) echo "Unknown parameter passed: $1"; exit 1 ;;
     esac
     shift
@@ -59,25 +55,16 @@ done
 # Global variables.
 export RESOURCE_LOCATION="westeurope"
 # export RESOURCE_LOCATION="uksouth"
-export RESOURCE_NAME="pangeo-k8s"
-export CLUSTER_GROUP_NAME="pangeo-cluster"
-export STORAGE_ACCT_NAME="pangeosa"
-export CONTAINER_NAME="ourpangeo"
-export ACR_GROUP_NAME="lab-pangeo-images"
-export SERVICE_PRINCIPAL_NAME="pangeo-sp"
-export ACR_SECRET_NAME="acr-container-auth"
+export CLUSTER_NAME=$RESOURE_GROUP_NAME
+export RESOURE_GROUP_NAME=$RESOURE_GROUP_NAME
+export STORAGE_ACCT_NAME=$(echo $RESOURE_GROUP_NAME | tr -cd '[a-zA-Z0-9]' | cut -c1-24)
 export PANGEO_CONFIG_PATH=$CONFIG_PATH
-export ENV="pangeo-azure"
 
 # Run the individual elements of the AKS resource setup process.
 [[ $MASTER -eq 1 ]] && ./create_cluster_master.sh
 [[ $NODES -eq 1 ]] && ./create_cluster_nodes.sh
 [[ $STORAGE -eq 1 ]] && ./create_cluster_storage.sh
-[[ $SECRETS -eq 1 ]] && ./create_cluster_secrets.sh
 [[ $HELM -eq 1 ]] && ./add_helm.sh
-[[ $PANGEO -eq 1 ]] && ./add_pangeo.sh
-
 
 # To access the kubernetes dashboard...
-# az aks browse -g 1st_wednesday -n as-practice
-# az aks browse -g $RESOURCE_GROUP_NAME -n $RESOURCE_NAME
+# az aks browse -g $RESOURCE_GROUP_NAME -n $CLUSTER_NAME

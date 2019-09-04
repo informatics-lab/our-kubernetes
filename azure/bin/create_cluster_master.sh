@@ -7,14 +7,14 @@ set -ex
 #####
 
 # Create a resource group for the cluster if it doesn't already exist
-if [ $(az group exists --resource-group ${CLUSTER_GROUP_NAME}) == "false" ]; then
-    az group create --name $CLUSTER_GROUP_NAME --location $RESOURCE_LOCATION
+if [ $(az group exists --resource-group ${RESOURE_GROUP_NAME}) == "false" ]; then
+    az group create --name $RESOURE_GROUP_NAME --location $RESOURCE_LOCATION
 fi
 
 # Create the AKS cluster master.
 az aks create \
-  --resource-group $CLUSTER_GROUP_NAME \
-  --name $RESOURCE_NAME \
+  --resource-group $RESOURE_GROUP_NAME \
+  --name $CLUSTER_NAME \
   --location $RESOURCE_LOCATION \
   --kubernetes-version 1.14.6 \
   --node-vm-size Standard_B8ms \

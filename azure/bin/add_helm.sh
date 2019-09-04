@@ -8,7 +8,7 @@ set -ex
 #####
 
 # Get kubernetes credentials for AKS resource.
-az aks get-credentials -g $CLUSTER_GROUP_NAME -n $RESOURCE_NAME --overwrite-existing
+az aks get-credentials -g $RESOURE_GROUP_NAME -n $CLUSTER_NAME --overwrite-existing
 
 # Create dashboard rbac config.
 kubectl apply -f ../charts/dashboard_rbac.yaml

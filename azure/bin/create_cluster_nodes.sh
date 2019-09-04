@@ -7,7 +7,7 @@ set -ex
 #####
 
 # Get kubernetes credentials for AKS resource.
-az aks get-credentials -g $CLUSTER_GROUP_NAME -n $RESOURCE_NAME --overwrite-existing
+az aks get-credentials -g $RESOURE_GROUP_NAME -n $CLUSTER_NAME --overwrite-existing
 
 # Create nodes for the the AKS cluster in multiple availability zones.
 # AZ_MIN=1
@@ -16,9 +16,9 @@ az aks get-credentials -g $CLUSTER_GROUP_NAME -n $RESOURCE_NAME --overwrite-exis
 # for AZ_NUM in `seq $AZ_MIN $AZ_MAX`; do
 #     # Set up standard nodes in AZ1-3.
 #     az aks nodepool add \
-#       --resource-group $CLUSTER_GROUP_NAME \
-#       --cluster-name $RESOURCE_NAME \
-#       --name "${RESOURCE_NAME}n${AZ_NUM}" \
+#       --resource-group $RESOURE_GROUP_NAME \
+#       --cluster-name $CLUSTER_NAME \
+#       --name "${CLUSTER_NAME}n${AZ_NUM}" \
 #       --node-zones $AZ_NUM \
 #       --node-vm-size Standard_B8ms \
 #       --enable-cluster-autoscaler \
@@ -29,9 +29,9 @@ az aks get-credentials -g $CLUSTER_GROUP_NAME -n $RESOURCE_NAME --overwrite-exis
 
 # Set up a standard worker nodepool.
 az aks nodepool add \
-  --resource-group $CLUSTER_GROUP_NAME \
-  --cluster-name $RESOURCE_NAME \
-  --name "panodes" \
+  --resource-group $RESOURE_GROUP_NAME \
+  --cluster-name $CLUSTER_NAME \
+  --name "workers" \
   --node-vm-size Standard_B16ms \
   --enable-cluster-autoscaler \
   --node-count 1 \
@@ -40,9 +40,9 @@ az aks nodepool add \
 
 # GPU nodes!
 # az aks nodepool add \
-#   --resource-group $CLUSTER_GROUP_NAME \
-#   --cluster-name $RESOURCE_NAME \
-#   --name "${RESOURCE_NAME}GPUs" \
+#   --resource-group $RESOURE_GROUP_NAME \
+#   --cluster-name $CLUSTER_NAME \
+#   --name "${CLUSTER_NAME}GPUs" \
 #   --node-vm-size Standard_NC6 \
 #   --enable-cluster-autoscaler \
 #   --node-count 1 \
