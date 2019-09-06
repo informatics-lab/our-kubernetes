@@ -11,15 +11,26 @@ if [ $(az group exists --resource-group ${RESOURE_GROUP_NAME}) == "false" ]; the
     az group create --name $RESOURE_GROUP_NAME --location $RESOURCE_LOCATION
 fi
 
-# Create the AKS cluster master.
+# Create the AKS cluster.
+DEFAULT_NODEPOOL="default"
+
 az aks create \
   --resource-group $RESOURE_GROUP_NAME \
   --name $CLUSTER_NAME \
   --location $RESOURCE_LOCATION \
   --kubernetes-version 1.14.6 \
-  --node-vm-size Standard_B8ms \
+  --node-vm-size Standard_B16ms \
+  --nodepool-name $DEFAULT_NODEPOOL\
   --enable-vmss \
   --node-count 1
+
+
+az aks nodepool update --cluster-name $CLUSTER_NAME \
+                       --name $DEFAULT_NODEPOOL \ 
+                       --resource-group $RESOURE_GROUP_NAME \ 
+                       --enable-cluster-autoscaler \
+                       --max-count 20 \ 
+                       --min-count 1
 
 # # # # #
 #

@@ -25,16 +25,13 @@ while [[ "$#" -gt 0 ]]; do
             echo " "
             echo "options:"
             echo "-h, --help                    show this help and exit"
-            echo "-c, --config-path             path to `our-pangeo` config repo"
             echo "-a, --all                     set up all elements of kubernetes cluster. Implies `-mnsxlp`"
             echo "-m, --master                  set up cluster master"
-            echo "-n, --nodes                   set up cluster nodes"
             echo "-s, --storage                 set up cluster storage"
             echo "-l, --helm                    add helm to cluster"
             echo "-r, --resource-group <name>   set the name of the resource group to create cluster in"
             exit 0
             ;;
-        -c|--config-path) CONFIG_PATH="$2"; shift;;
         -a|--all)
             MASTER=1
             NODES=1
@@ -42,7 +39,6 @@ while [[ "$#" -gt 0 ]]; do
             HELM=1
             ;;
         -m|--master) MASTER=1 ;;
-        -n|--nodes) NODES=1 ;;
         -s|--storage) STORAGE=1 ;;
         -l|--helm) HELM=1 ;;
         -p|--pangeo) PANGEO=1 ;;
@@ -58,11 +54,9 @@ export RESOURCE_LOCATION="westeurope"
 export CLUSTER_NAME=$RESOURE_GROUP_NAME
 export RESOURE_GROUP_NAME=$RESOURE_GROUP_NAME
 export STORAGE_ACCT_NAME=$(echo $RESOURE_GROUP_NAME | tr -cd '[a-zA-Z0-9]' | cut -c1-24)
-export PANGEO_CONFIG_PATH=$CONFIG_PATH
 
 # Run the individual elements of the AKS resource setup process.
-[[ $MASTER -eq 1 ]] && ./create_cluster_master.sh
-[[ $NODES -eq 1 ]] && ./create_cluster_nodes.sh
+[[ $MASTER -eq 1 ]] && ./create_cluster.sh
 [[ $STORAGE -eq 1 ]] && ./create_cluster_storage.sh
 [[ $HELM -eq 1 ]] && ./add_helm.sh
 
