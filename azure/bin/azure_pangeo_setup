@@ -10,7 +10,6 @@ set -ex
 
 # Set default behaviour.
 MASTER=0
-NODES=0
 STORAGE=0
 HELM=0
 RESOURE_GROUP_NAME="k8"
@@ -34,14 +33,12 @@ while [[ "$#" -gt 0 ]]; do
             ;;
         -a|--all)
             MASTER=1
-            NODES=1
             STORAGE=1
             HELM=1
             ;;
         -m|--master) MASTER=1 ;;
         -s|--storage) STORAGE=1 ;;
         -l|--helm) HELM=1 ;;
-        -p|--pangeo) PANGEO=1 ;;
         -r|--resource-group) RESOURE_GROUP_NAME="$2"; shift;;
         *) echo "Unknown parameter passed: $1"; exit 1 ;;
     esac

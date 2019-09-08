@@ -32,7 +32,10 @@ if [[ ! $EXISTING_SA_NAMES =~ $STORAGE_ACCT_NAME ]]; then
         --kind StorageV2
 fi
 
-# Add file storage class config for user homespaces...
-kubectl apply -f ../charts/azure-files-sc.yaml
+
+
+# Add file storage class config
+# Pipe azure-files-sc.yaml through sed to fill in the correct account name
 kubectl apply -f ../charts/azure-pvc-roles.yaml
-# ... and for scratch - in the pangeo namespace.
+cat  ../charts/azure-files-sc.yaml | sed "s/[$][{]STORAGE_ACCT_NAME[}]/$STORAGE_ACCT_NAME/g" | \
+   kubectl apply -f  - 
