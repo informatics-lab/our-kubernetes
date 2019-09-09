@@ -12,7 +12,7 @@ set -ex
 MASTER=0
 STORAGE=0
 HELM=0
-RESOURE_GROUP_NAME="k8"
+RESOURCE_GROUP_NAME="k8"
 
 # Parse command-line flags.
 while [[ "$#" -gt 0 ]]; do 
@@ -39,7 +39,7 @@ while [[ "$#" -gt 0 ]]; do
         -m|--master) MASTER=1 ;;
         -s|--storage) STORAGE=1 ;;
         -l|--helm) HELM=1 ;;
-        -r|--resource-group) RESOURE_GROUP_NAME="$2"; shift;;
+        -r|--resource-group) RESOURCE_GROUP_NAME="$2"; shift;;
         *) echo "Unknown parameter passed: $1"; exit 1 ;;
     esac
     shift
@@ -48,9 +48,9 @@ done
 # Global variables.
 export RESOURCE_LOCATION="westeurope"
 # export RESOURCE_LOCATION="uksouth"
-export CLUSTER_NAME=$RESOURE_GROUP_NAME
-export RESOURE_GROUP_NAME=$RESOURE_GROUP_NAME
-export STORAGE_ACCT_NAME=$(echo $RESOURE_GROUP_NAME | tr -cd '[a-zA-Z0-9]' | cut -c1-24)
+export CLUSTER_NAME=$RESOURCE_GROUP_NAME
+export RESOURCE_GROUP_NAME=$RESOURCE_GROUP_NAME
+export STORAGE_ACCT_NAME=$(echo $RESOURCE_GROUP_NAME | tr -cd '[a-zA-Z0-9]' | cut -c1-24)
 
 # Run the individual elements of the AKS resource setup process.
 [[ $MASTER -eq 1 ]] && ./create_cluster.sh

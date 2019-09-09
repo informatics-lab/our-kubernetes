@@ -12,11 +12,11 @@ set -ex
 #####
 
 # Get kubernetes credentials for AKS resource.
-az aks get-credentials -g $RESOURE_GROUP_NAME -n $CLUSTER_NAME --overwrite-existing
+az aks get-credentials -g $RESOURCE_GROUP_NAME -n $CLUSTER_NAME --overwrite-existing
 
 # XXX: The storage account needs to be created in the "shadow resource group".
 #      See https://github.com/Azure/AKS/issues/91.
-SHADOW_RG_NAME="MC_${RESOURE_GROUP_NAME}_${CLUSTER_NAME}_${RESOURCE_LOCATION}"
+SHADOW_RG_NAME="MC_${RESOURCE_GROUP_NAME}_${CLUSTER_NAME}_${RESOURCE_LOCATION}"
 
 # Check for an existing azure storage account for Pangeo, and create it if missing.
 EXISTING_SA_NAMES=$(az storage account list \

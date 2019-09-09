@@ -5,5 +5,5 @@ if [ -z "$1" ]
 fi
 
 az group deployment list $1 --query '[].name'
-echo "This will delete the resource group '$1' including the above deplotments.""
+echo "This will delete the resource group '$1' including the above deployments."
 az group delete --name $1

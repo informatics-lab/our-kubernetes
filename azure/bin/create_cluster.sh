@@ -7,15 +7,15 @@ set -ex
 #####
 
 # Create a resource group for the cluster if it doesn't already exist
-if [ $(az group exists --resource-group ${RESOURE_GROUP_NAME}) == "false" ]; then
-    az group create --name $RESOURE_GROUP_NAME --location $RESOURCE_LOCATION
+if [ $(az group exists --resource-group ${RESOURCE_GROUP_NAME}) == "false" ]; then
+    az group create --name $RESOURCE_GROUP_NAME --location $RESOURCE_LOCATION
 fi
 
 # Create the AKS cluster.
 DEFAULT_NODEPOOL="default"
 
 az aks create \
-  --resource-group $RESOURE_GROUP_NAME \
+  --resource-group $RESOURCE_GROUP_NAME \
   --name $CLUSTER_NAME \
   --location $RESOURCE_LOCATION \
   --kubernetes-version 1.14.6 \
@@ -27,7 +27,7 @@ az aks create \
 
 az aks nodepool update --cluster-name $CLUSTER_NAME \
                        --name $DEFAULT_NODEPOOL \ 
-                       --resource-group $RESOURE_GROUP_NAME \ 
+                       --resource-group $RESOURCE_GROUP_NAME \ 
                        --enable-cluster-autoscaler \
                        --max-count 20 \ 
                        --min-count 1
