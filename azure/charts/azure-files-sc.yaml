@@ -1,7 +1,7 @@
 kind: StorageClass
 apiVersion: storage.k8s.io/v1
 metadata:
-  name: azurefile
+  name: azurefile-retain
 provisioner: kubernetes.io/azure-file
 reclaimPolicy: Retain
 mountOptions:
@@ -12,4 +12,21 @@ mountOptions:
 parameters:
   skuName: Standard_LRS
   location: uksouth
-  storageAccount: pangeosa
+  storageAccount: ${STORAGE_ACCT_NAME}
+
+---
+kind: StorageClass
+apiVersion: storage.k8s.io/v1
+metadata:
+  name: azurefile
+provisioner: kubernetes.io/azure-file
+reclaimPolicy: Delete
+mountOptions:
+  - dir_mode=0777
+  - file_mode=0777
+  - uid=1000
+  - gid=1000
+parameters:
+  skuName: Standard_LRS
+  location: uksouth
+  storageAccount: ${STORAGE_ACCT_NAME}

@@ -26,10 +26,10 @@ az aks create \
 
 
 az aks nodepool update --cluster-name $CLUSTER_NAME \
-                       --name $DEFAULT_NODEPOOL \ 
-                       --resource-group $RESOURCE_GROUP_NAME \ 
+                       --name $DEFAULT_NODEPOOL \
+                       --resource-group $RESOURCE_GROUP_NAME \
                        --enable-cluster-autoscaler \
-                       --max-count 20 \ 
+                       --max-count 20 \
                        --min-count 1
 
 # # # # #
