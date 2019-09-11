@@ -15,12 +15,12 @@ Work in the `bin` dir:
 `cd bin`
 
 Install from scratch
-`./azure_pangeo_setup -a -r <resource_group/cluster name>`
+`./azure_k8_setup -a -r <resource_group/cluster name>`
 
 e.g.
 
-dev: `./azure_pangeo_setup -a -r panzure-dev`
-prod: `./azure_pangeo_setup -a -r panzure`
+dev: `./azure_k8_setup -a -r panzure-dev`
+prod: `./azure_k8_setup -a -r panzure`
 
 
 
