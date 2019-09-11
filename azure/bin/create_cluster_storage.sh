@@ -26,7 +26,7 @@ EXISTING_SA_NAMES=$(az storage account list \
                       --resource-group $STORAGE_RESOURCE_GROUP_NAME \
                       --query "[].name | join(',', @)")
 
-if [[ ! $EXISTING_SA_NAMES =~ $ENV_STORAGE_ACCT_NAME ]]; then
+if ! az storage account show --name $ENV_STORAGE_ACCT_NAME >/dev/null 2>&1 ; then
     az storage account create \
         --name $ENV_STORAGE_ACCT_NAME \
         --resource-group $STORAGE_RESOURCE_GROUP_NAME \
@@ -35,7 +35,7 @@ if [[ ! $EXISTING_SA_NAMES =~ $ENV_STORAGE_ACCT_NAME ]]; then
         --kind StorageV2
 fi
 
-if [[ ! $EXISTING_SA_NAMES =~ $COMMON_STORAGE_ACCT_NAME ]]; then
+if ! az storage account show --name $COMMON_STORAGE_ACCT_NAME >/dev/null 2>&1 ; then
     az storage account create \
         --name $COMMON_STORAGE_ACCT_NAME \
         --resource-group $STORAGE_RESOURCE_GROUP_NAME \

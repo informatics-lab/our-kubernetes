@@ -1,0 +1,63 @@
+#!/usr/bin/env bash
+
+set -ex
+
+#####
+# Create an autoscaling Azure Kubernetes Service resource.
+#####
+
+# Handle command-line flags.
+
+# Set default behaviour.
+CLUSTER=0
+STORAGE=0
+HELM=0
+RESOURCE_GROUP_NAME="k8"
+
+# Parse command-line flags.
+while [[ "$#" -gt 0 ]]; do 
+    case $1 in
+        -h|--help)
+            echo "$package - Set up an azure kubernetes cluster."
+            echo " "
+            echo "$package [options] application [arguments]"
+            echo " "
+            echo "options:"
+            echo "-h, --help                    show this help and exit"
+            echo "-a, --all                     set up all elements of kubernetes cluster. Implies `-mnsxlp`"
+            echo "-c, --cluster                 create cluster"
+            echo "-s, --storage                 set up cluster storage"
+            echo "-l, --helm                    add helm to cluster"
+            echo "-r, --resource-group <name>   set the name of the resource group to create cluster in"
+            exit 0
+            ;;
+        -a|--all)
+            CLUSTER=1
+            STORAGE=1
+            HELM=1
+            ;;
+        -c|--cluster) CLUSTER=1 ;;
+        -s|--storage) STORAGE=1 ;;
+        -l|--helm) HELM=1 ;;
+        -r|--resource-group) RESOURCE_GROUP_NAME="$2"; shift;;
+        *) echo "Unknown parameter passed: $1"; exit 1 ;;
+    esac
+    shift
+done
+
+# Global variables.
+export RESOURCE_LOCATION="westeurope"
+# export RESOURCE_LOCATION="uksouth"
+export CLUSTER_NAME=$RESOURCE_GROUP_NAME
+export RESOURCE_GROUP_NAME=$RESOURCE_GROUP_NAME
+export STORAGE_RESOURCE_GROUP_NAME="lab-storage"
+export ENV_STORAGE_ACCT_NAME=$(echo $RESOURCE_GROUP_NAME | tr -cd '[a-zA-Z0-9]' | cut -c1-24)
+export COMMON_STORAGE_ACCT_NAME="panzuredata"
+
+# Run the individual elements of the AKS resource setup process.
+[[ $CLUSTER -eq 1 ]] && ./create_cluster.sh
+[[ $STORAGE -eq 1 ]] && ./create_cluster_storage.sh
+[[ $HELM -eq 1 ]] && ./add_helm.sh
+
+# To access the kubernetes dashboard...
+# az aks browse -g $RESOURCE_GROUP_NAME -n $CLUSTER_NAME
