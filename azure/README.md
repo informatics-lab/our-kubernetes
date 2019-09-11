@@ -8,7 +8,6 @@ Link in the secrets
 `ln -s ../private-config/external-dns/azure-secrets.yaml azure/charts/azure-secrets.yaml`
 
 
-
 ## Install from scratch:
 
 Work in the `bin` dir:

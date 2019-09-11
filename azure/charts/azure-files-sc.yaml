@@ -1,7 +1,7 @@
 kind: StorageClass
 apiVersion: storage.k8s.io/v1
 metadata:
-  name: azurefile-retain
+  name: azurefile-env-retain
 provisioner: kubernetes.io/azure-file
 reclaimPolicy: Retain
 mountOptions:
@@ -12,13 +12,14 @@ mountOptions:
 parameters:
   skuName: Standard_LRS
   location: uksouth
-  storageAccount: ${STORAGE_ACCT_NAME}
+  storageAccount: ${ENV_STORAGE_ACCT_NAME}
+  resourceGroup: ${STORAGE_RESOURCE_GROUP_NAME}
 
 ---
 kind: StorageClass
 apiVersion: storage.k8s.io/v1
 metadata:
-  name: azurefile
+  name: azurefile-env
 provisioner: kubernetes.io/azure-file
 reclaimPolicy: Delete
 mountOptions:
@@ -29,4 +30,23 @@ mountOptions:
 parameters:
   skuName: Standard_LRS
   location: uksouth
-  storageAccount: ${STORAGE_ACCT_NAME}
+  storageAccount: ${ENV_STORAGE_ACCT_NAME}
+  resourceGroup: ${STORAGE_RESOURCE_GROUP_NAME}
+
+---
+kind: StorageClass
+apiVersion: storage.k8s.io/v1
+metadata:
+  name: azurefile-common-retain
+provisioner: kubernetes.io/azure-file
+reclaimPolicy: Retain
+mountOptions:
+  - dir_mode=0777
+  - file_mode=0777
+  - uid=1000
+  - gid=1000
+parameters:
+  skuName: Standard_LRS
+  location: uksouth
+  storageAccount: ${COMMON_STORAGE_ACCT_NAME}
+  resourceGroup: ${STORAGE_RESOURCE_GROUP_NAME}

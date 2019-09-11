@@ -50,7 +50,9 @@ export RESOURCE_LOCATION="westeurope"
 # export RESOURCE_LOCATION="uksouth"
 export CLUSTER_NAME=$RESOURCE_GROUP_NAME
 export RESOURCE_GROUP_NAME=$RESOURCE_GROUP_NAME
-export STORAGE_ACCT_NAME=$(echo $RESOURCE_GROUP_NAME | tr -cd '[a-zA-Z0-9]' | cut -c1-24)
+export STORAGE_RESOURCE_GROUP_NAME="lab-storage"
+export ENV_STORAGE_ACCT_NAME=$(echo $RESOURCE_GROUP_NAME | tr -cd '[a-zA-Z0-9]' | cut -c1-24)
+export COMMON_STORAGE_ACCT_NAME="panzuredata"
 
 # Run the individual elements of the AKS resource setup process.
 [[ $MASTER -eq 1 ]] && ./create_cluster.sh
