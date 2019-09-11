@@ -36,8 +36,6 @@ EXISTING_SP_ID=$(az ad sp list \
                   --query "[?servicePrincipalNames[0] == 'http://$SERVICE_PRINCIPAL_NAME'].appId" \
                   --output tsv)
 
-[ ! -z ${EXISTING_SP_ID} ] && az ad sp delete --id $EXISTING_SP_ID
-
 # Create a service principal for the vnet.
 SUBSCRIPTION_ID=$(az account list --query "[].id" --output tsv)
 CLIENT_SECRET=$(az ad sp create-for-rbac \
@@ -50,6 +48,10 @@ CLIENT_ID=$(az ad sp show \
               --id http://$SERVICE_PRINCIPAL_NAME \
               --query appId \
               --output tsv)
+# Wait for service principal to definitely create.
+echo "Waiting..."
+sleep 120
+echo "That will do."
 
 # Get the ID of the vnet.
 VNET_ID=$(az network vnet show \

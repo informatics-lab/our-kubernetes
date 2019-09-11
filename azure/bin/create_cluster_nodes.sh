@@ -31,7 +31,7 @@ az aks get-credentials -g $CLUSTER_GROUP_NAME -n $RESOURCE_NAME --overwrite-exis
 az aks nodepool add \
   --resource-group $CLUSTER_GROUP_NAME \
   --cluster-name $RESOURCE_NAME \
-  --name "${RESOURCE_NAME}nodes" \
+  --name "${RESOURCE_NAME}nds" \
   --node-vm-size Standard_B16ms \
   --enable-cluster-autoscaler \
   --node-count 1 \

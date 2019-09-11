@@ -59,15 +59,15 @@ done
 # Global variables.
 export RESOURCE_LOCATION="westeurope"
 # export RESOURCE_LOCATION="uksouth"
-export RESOURCE_NAME="pangeo"  # TODO: change to `panzure`.
-export CLUSTER_GROUP_NAME="pangeo-azure-vk"
+export RESOURCE_NAME="petezure"  # TODO: change to `panzure`.
+export CLUSTER_GROUP_NAME="pangeo-azure-vk2"
 export STORAGE_ACCT_NAME="pangeoazuresa"
 export CONTAINER_NAME="ourpangeo"
 export ACR_GROUP_NAME="lab-pangeo-images"
 export SERVICE_PRINCIPAL_NAME="our-pangeo-sp"
 export ACR_SECRET_NAME="acr-container-auth"
 export PANGEO_CONFIG_PATH=$CONFIG_PATH
-export ENV="panzure"
+export ENV="petezure"
 
 # Run the individual elements of the AKS resource setup process.
 [[ $MASTER -eq 1 ]] && ./create_cluster_master.sh
