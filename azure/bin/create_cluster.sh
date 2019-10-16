@@ -11,9 +11,27 @@ if [ $(az group exists --resource-group ${RESOURCE_GROUP_NAME}) == "false" ]; th
     az group create --name $RESOURCE_GROUP_NAME --location $RESOURCE_LOCATION
 fi
 
+# Create a VNet group for the cluster if it doesn't already exist
+RNG1="00"$RANDOM
+RNG1=$(echo -n $RNG1 | tail -c 2)
+RNG2="00"$RANDOM
+RNG2=$(echo -n $RNG2 | tail -c 2)
+IP_RANGE_BASE="1${RNG1}.${RNG2}.0.0"
+
+if ! az network vnet show --name $V_NET_NAME --resource-group $RESOURCE_GROUP_NAME >/dev/null 2>&1 ; then
+  az network vnet create \
+      --name $V_NET_NAME \
+      --resource-group $RESOURCE_GROUP_NAME \
+      --address-prefix "${IP_RANGE_BASE}/16" \
+      --subnet-name "${K8_SUB_NET_NAME}" \
+      --subnet-prefix "${IP_RANGE_BASE}/24" \
+      --location $RESOURCE_LOCATION
+fi
+
 # Create the AKS cluster.
 DEFAULT_NODEPOOL="default"
 
+SUB_NET_ID=$(az network vnet subnet show --name $K8_SUB_NET_NAME --resource-group $RESOURCE_GROUP_NAME --vnet-name $V_NET_NAME --query "id" -o tsv) 
 az aks create \
   --resource-group $RESOURCE_GROUP_NAME \
   --name $CLUSTER_NAME \
@@ -22,8 +40,8 @@ az aks create \
   --node-vm-size Standard_B16ms \
   --nodepool-name $DEFAULT_NODEPOOL\
   --enable-vmss \
-  --node-count 1
-
+  --node-count 1 \
+  --vnet-subnet-id $SUB_NET_ID
 
 az aks nodepool update --cluster-name $CLUSTER_NAME \
                        --name $DEFAULT_NODEPOOL \

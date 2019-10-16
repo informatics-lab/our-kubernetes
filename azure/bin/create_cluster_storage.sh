@@ -8,70 +8,95 @@ set -ex
 #   * Create an azure storage account to logically track all Pangeo storage on Azure, if it doesn't already exist
 #   * Apply the `azurefile` Kubernetes storage class config
 #   * Apply the azure PVC cluster role config
-#   * Create the `/scratch` PVC.
 #####
 
 # Get kubernetes credentials for AKS resource.
 az aks get-credentials -g $RESOURCE_GROUP_NAME -n $CLUSTER_NAME --overwrite-existing
+az provider register --namespace Microsoft.NetApp --wait # TODO: not sure if this is needed. Once, never, always...
 
+# Create storage for homespaces if does't exist already.
+# Using NetApp File
+# Code mostly taken from https://docs.microsoft.com/bs-latn-ba/azure/aks/azure-netapp-files
+CLUSTER_NODE_RESOURCE_GROUP=$(az aks show --resource-group $RESOURCE_GROUP_NAME --name $CLUSTER_NAME  --query nodeResourceGroup -o tsv)
+STORAGE_POOL_NAME=homespaces
+SERVICE_LEVEL="Premium"
+STORAGE_ACCOUNT_SIZE=4 #TiB
+VOLUME_SIZE_GiB=1000 # GiB
 
-# Create a resource group for the storage if it doesn't already exist
-if [ $(az group exists --resource-group ${STORAGE_RESOURCE_GROUP_NAME}) == "false" ]; then
-    az group create --name $STORAGE_RESOURCE_GROUP_NAME --location $RESOURCE_LOCATION
-fi
-
-
-# Check for an existing azure storage accounts for current environment and common, and create it if missing.
-EXISTING_SA_NAMES=$(az storage account list \
-                      --resource-group $STORAGE_RESOURCE_GROUP_NAME \
-                      --query "[].name | join(',', @)")
-
-if [[ ! $EXISTING_SA_NAMES =~ $ENV_STORAGE_ACCT_NAME ]]; then
-    az storage account create \
-        --name $ENV_STORAGE_ACCT_NAME \
-        --resource-group $STORAGE_RESOURCE_GROUP_NAME \
+# Storage account
+if ! az netappfiles account show -n $STORAGE_ACCT_NAME --resource-group $CLUSTER_NODE_RESOURCE_GROUP >/dev/null 2>&1 ; then
+    az netappfiles account create \
+        --resource-group $CLUSTER_NODE_RESOURCE_GROUP \
         --location $RESOURCE_LOCATION \
-        --sku Standard_LRS \
-        --kind StorageV2
+        --account-name $STORAGE_ACCT_NAME
 fi
 
-if [[ ! $EXISTING_SA_NAMES =~ $COMMON_STORAGE_ACCT_NAME ]]; then
-    az storage account create \
-        --name $COMMON_STORAGE_ACCT_NAME \
-        --resource-group $STORAGE_RESOURCE_GROUP_NAME \
+# Storage pool
+if ! az netappfiles pool show -n $STORAGE_POOL_NAME  --resource-group $CLUSTER_NODE_RESOURCE_GROUP --account-name $STORAGE_ACCT_NAME >/dev/null 2>&1 ; then
+    az netappfiles pool create \
+        --resource-group $CLUSTER_NODE_RESOURCE_GROUP \
         --location $RESOURCE_LOCATION \
-        --sku Standard_LRS \
-        --kind StorageV2
+        --account-name $STORAGE_ACCT_NAME \
+        --pool-name $STORAGE_POOL_NAME \
+        --size $STORAGE_ACCOUNT_SIZE \
+        --service-level $SERVICE_LEVEL
+fi
+
+# Delegate a subnet. Create a subnet outside of the K8 subnet range but in the vnet range 
+K8_RANGE=$(az network vnet subnet show --name $K8_SUB_NET_NAME --resource-group $RESOURCE_GROUP_NAME --vnet-name $V_NET_NAME --query "addressPrefix" -o tsv)
+STORAGE_RANGE=$(echo "$K8_RANGE" | cut -d"/" -f 1 | cut -d"." -f 1,2)".88.0/24"
+VNET_ID=$(az network vnet show --resource-group $RESOURCE_GROUP_NAME --name $V_NET_NAME --query "id" -o tsv)
+if ! az network vnet subnet show --vnet-name $V_NET_NAME --resource-group $RESOURCE_GROUP_NAME --name  $STORAGE_SUB_NET_NAME >/dev/null 2>&1 ; then
+    az network vnet subnet create \
+        --resource-group $RESOURCE_GROUP_NAME \
+        --vnet-name $V_NET_NAME \
+        --name $STORAGE_SUB_NET_NAME \
+        --delegations "Microsoft.NetApp/volumes" \
+        --address-prefixes $STORAGE_RANGE
+fi
+SUBNET_ID=$(az network vnet subnet show --resource-group $RESOURCE_GROUP_NAME --vnet-name $V_NET_NAME --name $STORAGE_SUB_NET_NAME --query "id" -o tsv)
+
+# Create volume
+UNIQUE_FILE_PATH=$(echo $STORAGE_ACCT_NAME"-homespace" | tr -cd '[a-zA-Z0-9]' | cut -c1-70) # Please note that creation token needs to be unique within all ANF Accounts
+VOLUME_NAME=$UNIQUE_FILE_PATH
+if ! az netappfiles volume show --resource-group $CLUSTER_NODE_RESOURCE_GROUP  --account-name $STORAGE_ACCT_NAME --pool-name $STORAGE_POOL_NAME  --volume-name $VOLUME_NAME  >/dev/null 2>&1 ; then
+    az netappfiles volume create \
+        --resource-group $CLUSTER_NODE_RESOURCE_GROUP \
+        --location $RESOURCE_LOCATION \
+        --account-name $STORAGE_ACCT_NAME \
+        --pool-name $STORAGE_POOL_NAME \
+        --name $VOLUME_NAME \
+        --service-level $SERVICE_LEVEL \
+        --vnet $VNET_ID \
+        --subnet $SUBNET_ID \
+        --usage-threshold $VOLUME_SIZE_GiB \
+        --creation-token $UNIQUE_FILE_PATH \
+        --protocol-types "NFSv3"
 fi
 
 
-# Add file storage class config
-# Pipe azure-files-sc.yaml through sed to fill in the correct account name
-kubectl apply -f ../charts/azure-pvc-roles.yaml
-cat  ../charts/azure-files-sc.yaml | \
-    sed "s/[$][{]ENV_STORAGE_ACCT_NAME[}]/$ENV_STORAGE_ACCT_NAME/g" |\
-    sed "s/[$][{]COMMON_STORAGE_ACCT_NAME[}]/$COMMON_STORAGE_ACCT_NAME/g" |\
-    sed "s/[$][{]STORAGE_RESOURCE_GROUP_NAME[}]/$STORAGE_RESOURCE_GROUP_NAME/g" |\
-   kubectl apply -f  - 
 
-# https://github.com/MicrosoftDocs/azure-docs/blob/master/articles/aks/azure-disk-volume.md#create-an-azure-disk
-# If you instead create the disk in a separate resource group, you must grant the Azure Kubernetes Service (AKS) service principal for your cluster the Contributor role to the disk's resource group.
-CLUSTER_SERVICE_PRINCIPAL_NAME=$( az aks show --name $CLUSTER_NAME --resource-group $RESOURCE_GROUP_NAME --query "servicePrincipalProfile.clientId" -o tsv)
-CLUSTER_SERVICE_PRINCIPAL_OBJECT_ID=$(az ad sp show --id $CLUSTER_SERVICE_PRINCIPAL_NAME --query "objectId" -o tsv)
+# create PV for created storage
 
-for STORAGE_ACCT in $COMMON_STORAGE_ACCT_NAME $ENV_STORAGE_ACCT_NAME
-do
-    SCOPE=$(az storage account show --name $STORAGE_ACCT --query "id" -o tsv)
-    az role assignment create --role "Contributor" \
-        --assignee-object-id "$CLUSTER_SERVICE_PRINCIPAL_OBJECT_ID" \
-        --assignee-principal-type "ServicePrincipal" \
-        --scope "$SCOPE"
-done
+NFS_HOME_IP=$(az netappfiles volume show --resource-group $CLUSTER_NODE_RESOURCE_GROUP --account-name $STORAGE_ACCT_NAME --pool-name $STORAGE_POOL_NAME --volume-name $VOLUME_NAME --query "mountTargets[0].ipAddress" -o tsv)
+NFS_HOME_PATH=$(az netappfiles volume show --resource-group $CLUSTER_NODE_RESOURCE_GROUP --account-name $STORAGE_ACCT_NAME --pool-name $STORAGE_POOL_NAME --volume-name $VOLUME_NAME --query "creationToken" -o tsv)
 
+# Pipe netapp-files-pv.yaml through sed to fill in the correct connection detais
+
+if ! kubectl get pv pv-panzure-dev-homespace >/dev/null 2>&1 ; then
+    cat  ../charts/netapp-files-pvc.yaml | \
+        sed "s/[$][{]NFS_HOME_IP[}]/$NFS_HOME_IP/g" |\
+        sed "s/[$][{]NFS_HOME_PATH[}]/$NFS_HOME_PATH/g" |\
+        sed "s/[$][{]CLUSTER_NAME[}]/$CLUSTER_NAME/g" |\
+    kubectl apply -f  - 
+fi
 
 # Add blob storage flex volume
 kubectl apply -f https://raw.githubusercontent.com/Azure/kubernetes-volume-drivers/master/flexvolume/blobfuse/deployment/blobfuse-flexvol-installer-1.9.yaml
 
 BLOB_FUSE_SECRET_NAME="blobfusecreds"
-COMMON_STORAGE_ACCT_KEY=$(az storage account keys list --account-name $COMMON_STORAGE_ACCT_NAME --query "[?permissions == 'Full'] | [0].value" --output tsv)
-kubectl create secret generic $BLOB_FUSE_SECRET_NAME -n default --from-literal accountname=$COMMON_STORAGE_ACCT_NAME --from-literal accountkey=$COMMON_STORAGE_ACCT_KEY --type="azure/blobfuse"
+BLOB_STORAGE_ACCT_KEY=$(az storage account keys list --account-name $BLOB_STORAGE_ACCT_NAME --query "[?permissions == 'Full'] | [0].value" --output tsv)
+if kubectl -n default get secret $BLOB_FUSE_SECRET_NAME >/dev/null 2>&1  ; then
+    kubectl -n default delete secret $BLOB_FUSE_SECRET_NAME
+fi
+kubectl create secret generic $BLOB_FUSE_SECRET_NAME -n default --from-literal accountname=$BLOB_STORAGE_ACCT_NAME --from-literal accountkey=$BLOB_STORAGE_ACCT_KEY --type="azure/blobfuse"
