@@ -22,6 +22,7 @@ STORAGE_POOL_NAME=homespaces
 SERVICE_LEVEL="Premium"
 STORAGE_ACCOUNT_SIZE=4 #TiB
 VOLUME_SIZE_GiB=1000 # GiB
+DATA_VOLUME_SIZE_GiB=2000 # GiB
 
 # Storage account
 if ! az netappfiles account show -n $STORAGE_ACCT_NAME --resource-group $CLUSTER_NODE_RESOURCE_GROUP >/dev/null 2>&1 ; then
@@ -56,7 +57,7 @@ if ! az network vnet subnet show --vnet-name $V_NET_NAME --resource-group $RESOU
 fi
 SUBNET_ID=$(az network vnet subnet show --resource-group $RESOURCE_GROUP_NAME --vnet-name $V_NET_NAME --name $STORAGE_SUB_NET_NAME --query "id" -o tsv)
 
-# Create volume
+# Create volume for homespaces
 UNIQUE_FILE_PATH=$(echo $STORAGE_ACCT_NAME"-homespace" | tr -cd '[a-zA-Z0-9]' | cut -c1-70) # Please note that creation token needs to be unique within all ANF Accounts
 VOLUME_NAME=$UNIQUE_FILE_PATH
 if ! az netappfiles volume show --resource-group $CLUSTER_NODE_RESOURCE_GROUP  --account-name $STORAGE_ACCT_NAME --pool-name $STORAGE_POOL_NAME  --volume-name $VOLUME_NAME  >/dev/null 2>&1 ; then
@@ -75,19 +76,44 @@ if ! az netappfiles volume show --resource-group $CLUSTER_NODE_RESOURCE_GROUP  -
 fi
 
 
+# Create volume for data
+DATA_UNIQUE_FILE_PATH=$(echo $STORAGE_ACCT_NAME"-data" | tr -cd '[a-zA-Z0-9]' | cut -c1-70) # Please note that creation token needs to be unique within all ANF Accounts
+DATA_VOLUME_NAME=$DATA_UNIQUE_FILE_PATH
+if ! az netappfiles volume show --resource-group $CLUSTER_NODE_RESOURCE_GROUP  --account-name $STORAGE_ACCT_NAME --pool-name $STORAGE_POOL_NAME  --volume-name $DATA_VOLUME_NAME  >/dev/null 2>&1 ; then
+    az netappfiles volume create \
+        --resource-group $CLUSTER_NODE_RESOURCE_GROUP \
+        --location $RESOURCE_LOCATION \
+        --account-name $STORAGE_ACCT_NAME \
+        --pool-name $STORAGE_POOL_NAME \
+        --name $DATA_VOLUME_NAME \
+        --service-level $SERVICE_LEVEL \
+        --vnet $VNET_ID \
+        --subnet $SUBNET_ID \
+        --usage-threshold $DATA_VOLUME_SIZE_GiB \
+        --creation-token $DATA_UNIQUE_FILE_PATH \
+        --protocol-types "NFSv3"
+fi
+
+
+
 
 # create PV for created storage
 
 NFS_HOME_IP=$(az netappfiles volume show --resource-group $CLUSTER_NODE_RESOURCE_GROUP --account-name $STORAGE_ACCT_NAME --pool-name $STORAGE_POOL_NAME --volume-name $VOLUME_NAME --query "mountTargets[0].ipAddress" -o tsv)
 NFS_HOME_PATH=$(az netappfiles volume show --resource-group $CLUSTER_NODE_RESOURCE_GROUP --account-name $STORAGE_ACCT_NAME --pool-name $STORAGE_POOL_NAME --volume-name $VOLUME_NAME --query "creationToken" -o tsv)
 
-# Pipe netapp-files-pv.yaml through sed to fill in the correct connection detais
+NFS_DATA_IP=$(az netappfiles volume show --resource-group $CLUSTER_NODE_RESOURCE_GROUP --account-name $STORAGE_ACCT_NAME --pool-name $STORAGE_POOL_NAME --volume-name $DATA_VOLUME_NAME --query "mountTargets[0].ipAddress" -o tsv)
+NFS_DATA_PATH=$(az netappfiles volume show --resource-group $CLUSTER_NODE_RESOURCE_GROUP --account-name $STORAGE_ACCT_NAME --pool-name $STORAGE_POOL_NAME --volume-name $DATA_VOLUME_NAME --query "creationToken" -o tsv)
 
-if ! kubectl get pv pv-panzure-dev-homespace >/dev/null 2>&1 ; then
-    cat  ../charts/netapp-files-pvc.yaml | \
+
+# Pipe netapp-files-pv.yaml through sed to fill in the correct connection detais
+if ! kubectl get pv pv-nfs >/dev/null 2>&1 ; then
+    cat  ../charts/netapp-files-pv.yaml | \
         sed "s/[$][{]NFS_HOME_IP[}]/$NFS_HOME_IP/g" |\
         sed "s/[$][{]NFS_HOME_PATH[}]/$NFS_HOME_PATH/g" |\
         sed "s/[$][{]CLUSTER_NAME[}]/$CLUSTER_NAME/g" |\
+        sed "s/[$][{]NFS_DATA_IP[}]/$NFS_DATA_IP/g" |\
+        sed "s/[$][{]NFS_DATA_PATH[}]/$NFS_DATA_PATH/g" |\
     kubectl apply -f  - 
 fi
 
